@@ -5,7 +5,7 @@ import {
   onAuthStateChanged,
   type User,
 } from "firebase/auth";
-import { auth } from "../firebase";
+import { auth } from "../lib";
 
 export const register = (email: string, password: string) =>
   createUserWithEmailAndPassword(auth, email, password);

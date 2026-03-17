@@ -10,16 +10,8 @@ import {
   serverTimestamp,
   type Unsubscribe,
 } from "firebase/firestore";
-import { db } from "../firebase";
-
-export type Contact = {
-  id: string;
-  userId: string;
-  connectionId: string;
-  name: string;
-  phone: string;
-  createdAt: Date;
-};
+import { db } from "../lib";
+import type { Contact } from "../types";
 
 const COLLECTION = "contacts";
 
@@ -27,7 +19,7 @@ export const createContact = (
   userId: string,
   connectionId: string,
   name: string,
-  phone: string
+  phone: string,
 ) =>
   addDoc(collection(db, COLLECTION), {
     userId,
@@ -40,18 +32,17 @@ export const createContact = (
 export const updateContact = (id: string, name: string, phone: string) =>
   updateDoc(doc(db, COLLECTION, id), { name, phone });
 
-export const deleteContact = (id: string) =>
-  deleteDoc(doc(db, COLLECTION, id));
+export const deleteContact = (id: string) => deleteDoc(doc(db, COLLECTION, id));
 
 export const subscribeToContacts = (
   userId: string,
   connectionId: string,
-  callback: (contacts: Contact[]) => void
+  callback: (contacts: Contact[]) => void,
 ): Unsubscribe => {
   const q = query(
     collection(db, COLLECTION),
     where("userId", "==", userId),
-    where("connectionId", "==", connectionId)
+    where("connectionId", "==", connectionId),
   );
   return onSnapshot(q, (snapshot) => {
     const contacts = snapshot.docs.map((d) => ({

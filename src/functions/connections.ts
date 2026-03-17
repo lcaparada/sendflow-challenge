@@ -10,14 +10,8 @@ import {
   serverTimestamp,
   type Unsubscribe,
 } from "firebase/firestore";
-import { db } from "../firebase";
-
-export type Connection = {
-  id: string;
-  userId: string;
-  name: string;
-  createdAt: Date;
-};
+import { db } from "../lib";
+import type { Connection } from "../types";
 
 const COLLECTION = "connections";
 
@@ -36,7 +30,7 @@ export const deleteConnection = (id: string) =>
 
 export const subscribeToConnections = (
   userId: string,
-  callback: (connections: Connection[]) => void
+  callback: (connections: Connection[]) => void,
 ): Unsubscribe => {
   const q = query(collection(db, COLLECTION), where("userId", "==", userId));
   return onSnapshot(q, (snapshot) => {
