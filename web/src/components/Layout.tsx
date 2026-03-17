@@ -218,6 +218,7 @@ const Layout = ({ children }: Props) => {
         sx={{
           width: { md: DRAWER_WIDTH },
           flexShrink: 0,
+          ...(isMobile && { zIndex: theme.zIndex.drawer + 2 }),
           "& .MuiDrawer-paper": {
             width: DRAWER_WIDTH,
             boxSizing: "border-box",
