@@ -7,14 +7,10 @@ admin.initializeApp();
 
 const db = admin.firestore();
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 const requireAuth = (uid: string | undefined): string => {
   if (!uid) throw new HttpsError("unauthenticated", "Authentication required.");
   return uid;
 };
-
-// ─── Connections ──────────────────────────────────────────────────────────────
 
 export const createConnection = onCall(async (request) => {
   const uid = requireAuth(request.auth?.uid);
@@ -42,8 +38,6 @@ export const deleteConnection = onCall(async (request) => {
   await db.collection("connections").doc(id).delete();
   return { id };
 });
-
-// ─── Contacts ─────────────────────────────────────────────────────────────────
 
 export const createContact = onCall(async (request) => {
   const uid = requireAuth(request.auth?.uid);
@@ -82,8 +76,6 @@ export const deleteContact = onCall(async (request) => {
   return { id };
 });
 
-// ─── Messages ─────────────────────────────────────────────────────────────────
-
 export const createMessage = onCall(async (request) => {
   const uid = requireAuth(request.auth?.uid);
   const { connectionId, contactIds, content, scheduledAt } = request.data as {
@@ -114,11 +106,14 @@ export const updateMessage = onCall(async (request) => {
     content: string;
     scheduledAt: string;
   };
-  await db.collection("messages").doc(id).update({
-    contactIds,
-    content,
-    scheduledAt: new Date(scheduledAt),
-  });
+  await db
+    .collection("messages")
+    .doc(id)
+    .update({
+      contactIds,
+      content,
+      scheduledAt: new Date(scheduledAt),
+    });
   return { id };
 });
 
@@ -136,43 +131,42 @@ export const deleteMessage = onCall(async (request) => {
   return { id };
 });
 
-// ─── Scheduler ────────────────────────────────────────────────────────────────
+export const processScheduledMessages = onSchedule(
+  "every 1 minutes",
+  async () => {
+    const now = new Date();
 
-/**
- * Runs every minute and marks scheduled messages as sent
- * when their scheduledAt time has passed.
- */
-export const processScheduledMessages = onSchedule("every 1 minutes", async () => {
-  const now = new Date();
+    const snapshot = await db
+      .collection("messages")
+      .where("status", "==", "scheduled")
+      .where("scheduledAt", "<=", now)
+      .get();
 
-  const snapshot = await db
-    .collection("messages")
-    .where("status", "==", "scheduled")
-    .where("scheduledAt", "<=", now)
-    .get();
+    if (snapshot.empty) return;
 
-  if (snapshot.empty) return;
+    const batch = db.batch();
+    snapshot.docs.forEach((doc) => {
+      batch.update(doc.ref, { status: "sent" });
+    });
 
-  const batch = db.batch();
-  snapshot.docs.forEach((doc) => {
-    batch.update(doc.ref, { status: "sent" });
-  });
+    await batch.commit();
+    console.log(`Processed ${snapshot.size} scheduled message(s).`);
+  },
+);
 
-  await batch.commit();
-  console.log(`Processed ${snapshot.size} scheduled message(s).`);
-});
+export const onMessageCreated = onDocumentCreated(
+  "messages/{messageId}",
+  async (event) => {
+    const data = event.data?.data();
+    if (!data || data.status !== "scheduled") return;
 
-/**
- * Firestore trigger: marks a new message as sent immediately
- * if its scheduledAt is already in the past.
- */
-export const onMessageCreated = onDocumentCreated("messages/{messageId}", async (event) => {
-  const data = event.data?.data();
-  if (!data || data.status !== "scheduled") return;
-
-  const scheduledAt: Date = data.scheduledAt?.toDate?.() ?? new Date(data.scheduledAt);
-  if (scheduledAt <= new Date()) {
-    await event.data!.ref.update({ status: "sent" });
-    console.log(`Message ${event.params.messageId} marked as sent immediately.`);
-  }
-});
+    const scheduledAt: Date =
+      data.scheduledAt?.toDate?.() ?? new Date(data.scheduledAt);
+    if (scheduledAt <= new Date()) {
+      await event.data!.ref.update({ status: "sent" });
+      console.log(
+        `Message ${event.params.messageId} marked as sent immediately.`,
+      );
+    }
+  },
+);
