@@ -421,15 +421,39 @@ const MessagesPage = () => {
             autoFocus
             sx={textFieldSx}
           />
-          <TextField
-            label="Data e hora de envio"
-            type="datetime-local"
-            value={scheduledAt}
-            onChange={(e) => setScheduledAt(e.target.value)}
-            fullWidth
-            slotProps={{ inputLabel: { shrink: true } }}
-            sx={textFieldSx}
-          />
+          <Box>
+            <Box className="flex items-center justify-between mb-1">
+              <Typography variant="body2" fontWeight={600} sx={{ color: "#374151" }}>
+                Data e hora de envio
+              </Typography>
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={() => setScheduledAt(toDatetimeLocal(new Date()))}
+                sx={{
+                  borderRadius: 1.5,
+                  textTransform: "none",
+                  fontWeight: 700,
+                  fontSize: 11,
+                  px: 1.5,
+                  py: 0.3,
+                  borderColor: "#6366f1",
+                  color: "#6366f1",
+                  "&:hover": { background: "#ede9fe", borderColor: "#6366f1" },
+                }}
+              >
+                Agora
+              </Button>
+            </Box>
+            <TextField
+              type="datetime-local"
+              value={scheduledAt}
+              onChange={(e) => setScheduledAt(e.target.value)}
+              fullWidth
+              slotProps={{ inputLabel: { shrink: true } }}
+              sx={textFieldSx}
+            />
+          </Box>
 
           <Box>
             <Typography variant="body2" fontWeight={600} sx={{ color: "#374151", mb: 1 }}>
