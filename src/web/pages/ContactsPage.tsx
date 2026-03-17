@@ -166,7 +166,7 @@ const ContactsPage = () => {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           size="small"
-          sx={{ mb: 4, maxWidth: 360, ...textFieldSx }}
+          sx={{ mb: 4, width: "100%", ...textFieldSx }}
           slotProps={{
             input: {
               startAdornment: (
