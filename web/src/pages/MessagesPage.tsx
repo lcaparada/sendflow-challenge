@@ -29,8 +29,11 @@ import ScheduleIcon from "@mui/icons-material/Schedule";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import { useParams } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "../hooks/useAuth";
 import type { Contact, Message } from "../types";
+import { messageSchema, type MessageSchemaType } from "../schemas";
 import {
   createMessage,
   deleteMessage,
@@ -61,13 +64,22 @@ const MessagesPage = () => {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Message | null>(null);
-  const [content, setContent] = useState("");
-  const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
-  const [scheduledAt, setScheduledAt] = useState("");
-  const [saving, setSaving] = useState(false);
-
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<MessageSchemaType>({
+    resolver: zodResolver(messageSchema),
+    defaultValues: { content: "", scheduledAt: "", contactIds: [] },
+  });
+
+  const selectedContacts = watch("contactIds");
 
   useEffect(() => {
     if (!user || !connectionId) return;
@@ -100,51 +112,35 @@ const MessagesPage = () => {
 
   const openCreate = () => {
     setEditing(null);
-    setContent("");
-    setSelectedContacts([]);
-    setScheduledAt("");
+    reset({ content: "", scheduledAt: "", contactIds: [] });
     setDialogOpen(true);
   };
 
   const openEdit = (message: Message) => {
     setEditing(message);
-    setContent(message.content);
-    setSelectedContacts(message.contactIds);
-    setScheduledAt(toDatetimeLocal(message.scheduledAt));
+    reset({
+      content: message.content,
+      scheduledAt: toDatetimeLocal(message.scheduledAt),
+      contactIds: message.contactIds,
+    });
     setDialogOpen(true);
   };
 
   const closeDialog = () => {
     setDialogOpen(false);
     setEditing(null);
+    reset({ content: "", scheduledAt: "", contactIds: [] });
   };
 
-  const handleSave = async () => {
-    if (
-      !content.trim() ||
-      selectedContacts.length === 0 ||
-      !scheduledAt ||
-      !user ||
-      !connectionId
-    )
-      return;
-    setSaving(true);
-    try {
-      const date = new Date(scheduledAt);
-      if (editing) {
-        await updateMessage(editing.id, selectedContacts, content.trim(), date);
-      } else {
-        await createMessage(
-          connectionId,
-          selectedContacts,
-          content.trim(),
-          date,
-        );
-      }
-      closeDialog();
-    } finally {
-      setSaving(false);
+  const onSubmit = async (data: MessageSchemaType) => {
+    if (!user || !connectionId) return;
+    const date = new Date(data.scheduledAt);
+    if (editing) {
+      await updateMessage(editing.id, data.contactIds, data.content, date);
+    } else {
+      await createMessage(connectionId, data.contactIds, data.content, date);
     }
+    closeDialog();
   };
 
   const handleDelete = (id: string) => setDeleteTargetId(id);
@@ -161,8 +157,11 @@ const MessagesPage = () => {
   };
 
   const toggleContact = (id: string) => {
-    setSelectedContacts((prev) =>
-      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id],
+    const current = selectedContacts ?? [];
+    setValue(
+      "contactIds",
+      current.includes(id) ? current.filter((c) => c !== id) : [...current, id],
+      { shouldValidate: true },
     );
   };
 
@@ -555,19 +554,21 @@ const MessagesPage = () => {
         maxWidth="sm"
         slotProps={{ paper: { sx: { borderRadius: 3 } } }}
       >
+        <Box component="form" onSubmit={handleSubmit(onSubmit)}>
         <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>
           {editing ? "Editar mensagem" : "Nova mensagem"}
         </DialogTitle>
         <DialogContent className="flex flex-col gap-3">
           <TextField
             label="Mensagem"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
             fullWidth
             multiline
             rows={3}
             margin="normal"
             autoFocus
+            error={!!errors.content}
+            helperText={errors.content?.message}
+            {...register("content")}
             sx={textFieldSx}
           />
           <Box>
@@ -580,9 +581,10 @@ const MessagesPage = () => {
                 Data e hora de envio
               </Typography>
               <Button
+                type="button"
                 size="small"
                 variant="outlined"
-                onClick={() => setScheduledAt(toDatetimeLocal(new Date()))}
+                onClick={() => setValue("scheduledAt", toDatetimeLocal(new Date()), { shouldValidate: true })}
                 sx={{
                   borderRadius: 1.5,
                   textTransform: "none",
@@ -600,9 +602,10 @@ const MessagesPage = () => {
             </Box>
             <TextField
               type="datetime-local"
-              value={scheduledAt}
-              onChange={(e) => setScheduledAt(e.target.value)}
               fullWidth
+              error={!!errors.scheduledAt}
+              helperText={errors.scheduledAt?.message}
+              {...register("scheduledAt")}
               slotProps={{ inputLabel: { shrink: true } }}
               sx={textFieldSx}
             />
@@ -715,14 +718,9 @@ const MessagesPage = () => {
             Cancelar
           </Button>
           <Button
-            onClick={handleSave}
+            type="submit"
             variant="contained"
-            disabled={
-              !content.trim() ||
-              selectedContacts.length === 0 ||
-              !scheduledAt ||
-              saving
-            }
+            disabled={isSubmitting}
             sx={{
               borderRadius: 2,
               textTransform: "none",
@@ -733,9 +731,10 @@ const MessagesPage = () => {
               },
             }}
           >
-            {saving ? <CircularProgress size={20} color="inherit" /> : "Salvar"}
+            {isSubmitting ? <CircularProgress size={20} color="inherit" /> : "Salvar"}
           </Button>
         </DialogActions>
+        </Box>
       </Dialog>
     </Box>
   );

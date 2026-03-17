@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -18,27 +18,40 @@ import {
   Send,
 } from "@mui/icons-material";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { login } from "../functions/auth";
+import { loginSchema, type LoginSchemaType } from "../schemas";
+
+const textFieldSx = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 2,
+    "&:hover fieldset": { borderColor: "#6366f1" },
+    "&.Mui-focused fieldset": { borderColor: "#6366f1" },
+  },
+  "& label.Mui-focused": { color: "#6366f1" },
+};
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [firebaseError, setFirebaseError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginSchemaType>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: LoginSchemaType) => {
+    setFirebaseError("");
     try {
-      await login(email, password);
+      await login(data.email, data.password);
       navigate("/connections");
     } catch {
-      setError("E-mail ou senha inválidos.");
-    } finally {
-      setLoading(false);
+      setFirebaseError("E-mail ou senha inválidos.");
     }
   };
 
@@ -177,30 +190,30 @@ const LoginPage = () => {
             Entre na sua conta para continuar
           </Typography>
 
-          {error && (
+          {firebaseError && (
             <Alert
               severity="error"
               className="mb-4"
               sx={{ borderRadius: 2, animation: "shake 0.4s ease-out" }}
             >
-              {error}
+              {firebaseError}
             </Alert>
           )}
 
           <Box
             component="form"
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-4"
           >
             <TextField
               label="E-mail"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
               placeholder="Digite seu e-mail"
               fullWidth
               autoFocus
+              error={!!errors.email}
+              helperText={errors.email?.message}
+              {...register("email")}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -210,24 +223,17 @@ const LoginPage = () => {
                   ),
                 },
               }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
-                  "&:hover fieldset": { borderColor: "#6366f1" },
-                  "&.Mui-focused fieldset": { borderColor: "#6366f1" },
-                },
-                "& label.Mui-focused": { color: "#6366f1" },
-              }}
+              sx={textFieldSx}
             />
 
             <TextField
               label="Senha"
               type={showPassword ? "text" : "password"}
-              value={password}
               placeholder="******"
-              onChange={(e) => setPassword(e.target.value)}
-              required
               fullWidth
+              error={!!errors.password}
+              helperText={errors.password?.message}
+              {...register("password")}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -254,21 +260,14 @@ const LoginPage = () => {
                   ),
                 },
               }}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 2,
-                  "&:hover fieldset": { borderColor: "#6366f1" },
-                  "&.Mui-focused fieldset": { borderColor: "#6366f1" },
-                },
-                "& label.Mui-focused": { color: "#6366f1" },
-              }}
+              sx={textFieldSx}
             />
 
             <Button
               type="submit"
               variant="contained"
               size="large"
-              disabled={loading}
+              disabled={isSubmitting}
               fullWidth
               sx={{
                 mt: 1,
@@ -289,7 +288,7 @@ const LoginPage = () => {
                 "&:active": { transform: "translateY(0)" },
               }}
             >
-              {loading ? (
+              {isSubmitting ? (
                 <CircularProgress size={24} color="inherit" />
               ) : (
                 "Entrar"

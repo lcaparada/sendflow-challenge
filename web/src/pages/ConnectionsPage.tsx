@@ -22,6 +22,8 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import HubIcon from "@mui/icons-material/Hub";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "../hooks/useAuth";
 import type { Connection } from "../types";
 import {
@@ -30,6 +32,7 @@ import {
   subscribeToConnections,
   updateConnection,
 } from "../functions";
+import { connectionSchema, type ConnectionSchemaType } from "../schemas";
 
 const ConnectionsPage = () => {
   const { user } = useAuth();
@@ -37,14 +40,19 @@ const ConnectionsPage = () => {
 
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(true);
-
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Connection | null>(null);
-  const [name, setName] = useState("");
-  const [saving, setSaving] = useState(false);
-
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ConnectionSchemaType>({
+    resolver: zodResolver(connectionSchema),
+  });
 
   useEffect(() => {
     if (!user) return;
@@ -57,35 +65,30 @@ const ConnectionsPage = () => {
 
   const openCreate = () => {
     setEditing(null);
-    setName("");
+    reset({ name: "" });
     setDialogOpen(true);
   };
 
   const openEdit = (connection: Connection) => {
     setEditing(connection);
-    setName(connection.name);
+    reset({ name: connection.name });
     setDialogOpen(true);
   };
 
   const closeDialog = () => {
     setDialogOpen(false);
-    setName("");
     setEditing(null);
+    reset({ name: "" });
   };
 
-  const handleSave = async () => {
-    if (!name.trim() || !user) return;
-    setSaving(true);
-    try {
-      if (editing) {
-        await updateConnection(editing.id, name.trim());
-      } else {
-        await createConnection(name.trim());
-      }
-      closeDialog();
-    } finally {
-      setSaving(false);
+  const onSubmit = async (data: ConnectionSchemaType) => {
+    if (!user) return;
+    if (editing) {
+      await updateConnection(editing.id, data.name);
+    } else {
+      await createConnection(data.name);
     }
+    closeDialog();
   };
 
   const handleDelete = (id: string) => setDeleteTargetId(id);
@@ -359,52 +362,55 @@ const ConnectionsPage = () => {
         maxWidth="xs"
         slotProps={{ paper: { sx: { borderRadius: 3 } } }}
       >
-        <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>
-          {editing ? "Editar conexão" : "Nova conexão"}
-        </DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Nome da conexão"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            fullWidth
-            autoFocus
-            margin="normal"
-            onKeyDown={(e) => e.key === "Enter" && handleSave()}
-            sx={{
-              "& .MuiOutlinedInput-root": {
+        <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+          <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>
+            {editing ? "Editar conexão" : "Nova conexão"}
+          </DialogTitle>
+          <DialogContent>
+            <TextField
+              label="Nome da conexão"
+              fullWidth
+              autoFocus
+              margin="normal"
+              error={!!errors.name}
+              helperText={errors.name?.message}
+              {...register("name")}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  "&:hover fieldset": { borderColor: "#6366f1" },
+                  "&.Mui-focused fieldset": { borderColor: "#6366f1" },
+                },
+                "& label.Mui-focused": { color: "#6366f1" },
+              }}
+            />
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
+            <Button
+              type="button"
+              onClick={closeDialog}
+              sx={{ borderRadius: 2, textTransform: "none", color: "#6b7280" }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isSubmitting}
+              sx={{
                 borderRadius: 2,
-                "&:hover fieldset": { borderColor: "#6366f1" },
-                "&.Mui-focused fieldset": { borderColor: "#6366f1" },
-              },
-              "& label.Mui-focused": { color: "#6366f1" },
-            }}
-          />
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-          <Button
-            onClick={closeDialog}
-            sx={{ borderRadius: 2, textTransform: "none", color: "#6b7280" }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleSave}
-            variant="contained"
-            disabled={!name.trim() || saving}
-            sx={{
-              borderRadius: 2,
-              textTransform: "none",
-              fontWeight: 600,
-              background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-              "&:hover": {
-                background: "linear-gradient(135deg, #4f52e0 0%, #7c3aed 100%)",
-              },
-            }}
-          >
-            {saving ? <CircularProgress size={20} color="inherit" /> : "Salvar"}
-          </Button>
-        </DialogActions>
+                textTransform: "none",
+                fontWeight: 600,
+                background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #4f52e0 0%, #7c3aed 100%)",
+                },
+              }}
+            >
+              {isSubmitting ? <CircularProgress size={20} color="inherit" /> : "Salvar"}
+            </Button>
+          </DialogActions>
+        </Box>
       </Dialog>
     </Box>
   );

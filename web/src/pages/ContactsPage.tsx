@@ -25,8 +25,12 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import SearchIcon from "@mui/icons-material/Search";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import { useParams } from "react-router-dom";
+import { IMaskInput } from "react-imask";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "../hooks/useAuth";
 import type { Contact } from "../types";
+import { contactSchema, type ContactSchemaType } from "../schemas";
 import {
   createContact,
   deleteContact,
@@ -50,16 +54,21 @@ const ContactsPage = () => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Contact | null>(null);
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [phoneError, setPhoneError] = useState("");
-
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setError,
+    control,
+    formState: { errors, isSubmitting },
+  } = useForm<ContactSchemaType>({
+    resolver: zodResolver(contactSchema),
+  });
 
   useEffect(() => {
     if (!user || !connectionId) return;
@@ -78,46 +87,39 @@ const ContactsPage = () => {
 
   const openCreate = () => {
     setEditing(null);
-    setName("");
-    setPhone("");
+    reset({ name: "", phone: "" });
     setDialogOpen(true);
   };
 
   const openEdit = (contact: Contact) => {
     setEditing(contact);
-    setName(contact.name);
-    setPhone(contact.phone);
+    reset({ name: contact.name, phone: contact.phone });
     setDialogOpen(true);
   };
 
   const closeDialog = () => {
     setDialogOpen(false);
     setEditing(null);
-    setName("");
-    setPhone("");
-    setPhoneError("");
+    reset({ name: "", phone: "" });
   };
 
-  const handleSave = async () => {
-    if (!name.trim() || !phone.trim() || !user || !connectionId) return;
+  const onSubmit = async (data: ContactSchemaType) => {
+    if (!user || !connectionId) return;
     const duplicate = contacts.find(
-      (c) => c.phone === phone.trim() && c.id !== editing?.id,
+      (c) => c.phone === data.phone && c.id !== editing?.id,
     );
     if (duplicate) {
-      setPhoneError("Este número já está cadastrado para outro contato.");
+      setError("phone", {
+        message: "Este número já está cadastrado para outro contato.",
+      });
       return;
     }
-    setSaving(true);
-    try {
-      if (editing) {
-        await updateContact(editing.id, name.trim(), phone.trim());
-      } else {
-        await createContact(connectionId, name.trim(), phone.trim());
-      }
-      closeDialog();
-    } finally {
-      setSaving(false);
+    if (editing) {
+      await updateContact(editing.id, data.name, data.phone);
+    } else {
+      await createContact(connectionId, data.name, data.phone);
     }
+    closeDialog();
   };
 
   const handleDelete = (id: string) => setDeleteTargetId(id);
@@ -250,7 +252,8 @@ const ContactsPage = () => {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
+            gridTemplateColumns:
+              "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
             gap: 2,
           }}
         >
@@ -353,7 +356,15 @@ const ContactsPage = () => {
         fullWidth
         slotProps={{ paper: { sx: { borderRadius: 3 } } }}
       >
-        <DialogTitle sx={{ fontWeight: 700, pb: 1, display: "flex", alignItems: "center", gap: 1 }}>
+        <DialogTitle
+          sx={{
+            fontWeight: 700,
+            pb: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
           <WarningAmberRoundedIcon sx={{ color: "#ef4444" }} />
           Excluir contato
         </DialogTitle>
@@ -382,7 +393,11 @@ const ContactsPage = () => {
               "&:hover": { background: "#dc2626" },
             }}
           >
-            {deleting ? <CircularProgress size={20} color="inherit" /> : "Excluir"}
+            {deleting ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              "Excluir"
+            )}
           </Button>
         </DialogActions>
       </Dialog>
@@ -394,72 +409,97 @@ const ContactsPage = () => {
         maxWidth="xs"
         slotProps={{ paper: { sx: { borderRadius: 3 } } }}
       >
-        <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>
-          {editing ? "Editar contato" : "Novo contato"}
-        </DialogTitle>
-        <DialogContent className="flex flex-col gap-2">
-          <TextField
-            label="Nome"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            fullWidth
-            autoFocus
-            margin="normal"
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PersonIcon sx={{ color: "#9ca3af", fontSize: 20 }} />
-                  </InputAdornment>
-                ),
-              },
-            }}
-            sx={textFieldSx}
-          />
-          <TextField
-            label="Telefone"
-            value={phone}
-            onChange={(e) => { setPhone(e.target.value); setPhoneError(""); }}
-            fullWidth
-            placeholder="+55 11 91234-5678"
-            error={!!phoneError}
-            helperText={phoneError}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <PhoneIcon sx={{ color: "#9ca3af", fontSize: 20 }} />
-                  </InputAdornment>
-                ),
-              },
-            }}
-            sx={textFieldSx}
-          />
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
-          <Button
-            onClick={closeDialog}
-            sx={{ borderRadius: 2, textTransform: "none", color: "#6b7280" }}
-          >
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleSave}
-            variant="contained"
-            disabled={!name.trim() || !phone.trim() || saving}
-            sx={{
-              borderRadius: 2,
-              textTransform: "none",
-              fontWeight: 600,
-              background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-              "&:hover": {
-                background: "linear-gradient(135deg, #4f52e0 0%, #7c3aed 100%)",
-              },
-            }}
-          >
-            {saving ? <CircularProgress size={20} color="inherit" /> : "Salvar"}
-          </Button>
-        </DialogActions>
+        <Box component="form" onSubmit={handleSubmit(onSubmit)}>
+          <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>
+            {editing ? "Editar contato" : "Novo contato"}
+          </DialogTitle>
+          <DialogContent className="flex flex-col gap-2">
+            <TextField
+              label="Nome"
+              fullWidth
+              autoFocus
+              placeholder="Digite o nome do contato"
+              margin="normal"
+              error={!!errors.name}
+              helperText={errors.name?.message}
+              {...register("name")}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <PersonIcon sx={{ color: "#9ca3af", fontSize: 20 }} />
+                    </InputAdornment>
+                  ),
+                },
+              }}
+              sx={textFieldSx}
+            />
+            <Controller
+              name="phone"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  label="Telefone"
+                  fullWidth
+                  error={!!errors.phone}
+                  helperText={errors.phone?.message}
+                  value={field.value}
+                  onChange={field.onChange}
+                  inputRef={field.ref}
+                  slotProps={{
+                    input: {
+                      inputComponent: IMaskInput as never,
+                      inputProps: {
+                        mask: [
+                          { mask: "(00) 0000-0000" },
+                          { mask: "(00) 00000-0000" },
+                        ],
+                        onAccept: (value: string) => field.onChange(value),
+                        placeholder: "(21) 98812-6131",
+                      },
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <PhoneIcon sx={{ color: "#9ca3af", fontSize: 20 }} />
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                  sx={textFieldSx}
+                />
+              )}
+            />
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
+            <Button
+              type="button"
+              onClick={closeDialog}
+              sx={{ borderRadius: 2, textTransform: "none", color: "#6b7280" }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={isSubmitting}
+              sx={{
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: 600,
+                background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                "&:hover": {
+                  background:
+                    "linear-gradient(135deg, #4f52e0 0%, #7c3aed 100%)",
+                },
+              }}
+            >
+              {isSubmitting ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                "Salvar"
+              )}
+            </Button>
+          </DialogActions>
+        </Box>
       </Dialog>
     </Box>
   );

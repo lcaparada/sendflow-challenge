@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -19,7 +19,10 @@ import {
   PersonAdd,
 } from "@mui/icons-material";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
-import { register } from "../functions/auth";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { register as registerUser } from "../functions/auth";
+import { registerSchema, type RegisterSchemaType } from "../schemas";
 
 const textFieldSx = {
   "& .MuiOutlinedInput-root": {
@@ -32,38 +35,27 @@ const textFieldSx = {
 
 const RegisterPage = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirm, setConfirm] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [firebaseError, setFirebaseError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError("");
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterSchemaType>({
+    resolver: zodResolver(registerSchema),
+  });
 
-    if (password !== confirm) {
-      setError("As senhas não coincidem.");
-      return;
-    }
-
-    if (password.length < 6) {
-      setError("A senha deve ter no mínimo 6 caracteres.");
-      return;
-    }
-
-    setLoading(true);
+  const onSubmit = async (data: RegisterSchemaType) => {
+    setFirebaseError("");
     try {
-      await register(email, password);
+      await registerUser(data.email, data.password);
       navigate("/connections");
     } catch {
-      setError(
+      setFirebaseError(
         "Não foi possível criar a conta. Verifique os dados e tente novamente.",
       );
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -202,30 +194,30 @@ const RegisterPage = () => {
             Preencha os dados para começar
           </Typography>
 
-          {error && (
+          {firebaseError && (
             <Alert
               severity="error"
               className="mb-4"
               sx={{ borderRadius: 2, animation: "shake 0.4s ease-out" }}
             >
-              {error}
+              {firebaseError}
             </Alert>
           )}
 
           <Box
             component="form"
-            onSubmit={handleSubmit}
+            onSubmit={handleSubmit(onSubmit)}
             className="flex flex-col gap-4"
           >
             <TextField
               label="E-mail"
               type="email"
-              value={email}
               placeholder="Digite seu e-mail"
-              onChange={(e) => setEmail(e.target.value)}
-              required
               fullWidth
               autoFocus
+              error={!!errors.email}
+              helperText={errors.email?.message}
+              {...register("email")}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -241,12 +233,11 @@ const RegisterPage = () => {
             <TextField
               label="Senha"
               type={showPassword ? "text" : "password"}
-              value={password}
               placeholder="******"
-              onChange={(e) => setPassword(e.target.value)}
-              required
               fullWidth
-              helperText="Mínimo de 6 caracteres"
+              error={!!errors.password}
+              helperText={errors.password?.message ?? "Mínimo de 6 caracteres"}
+              {...register("password")}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -279,11 +270,11 @@ const RegisterPage = () => {
             <TextField
               label="Confirmar senha"
               type={showConfirm ? "text" : "password"}
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              required
               placeholder="******"
               fullWidth
+              error={!!errors.confirm}
+              helperText={errors.confirm?.message}
+              {...register("confirm")}
               slotProps={{
                 input: {
                   startAdornment: (
@@ -317,7 +308,7 @@ const RegisterPage = () => {
               type="submit"
               variant="contained"
               size="large"
-              disabled={loading}
+              disabled={isSubmitting}
               fullWidth
               sx={{
                 mt: 1,
@@ -338,7 +329,7 @@ const RegisterPage = () => {
                 "&:active": { transform: "translateY(0)" },
               }}
             >
-              {loading ? (
+              {isSubmitting ? (
                 <CircularProgress size={24} color="inherit" />
               ) : (
                 "Cadastrar"
