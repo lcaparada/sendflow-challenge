@@ -190,8 +190,7 @@ const MessagesPage = () => {
 
   return (
     <Box sx={{ animation: "fadeUp 0.4s ease-out both" }}>
-      {/* Header */}
-      <Box className="flex items-center justify-between mb-6">
+      <Box className="flex items-center justify-between flex-wrap gap-3 mb-6">
         <Box>
           <Typography
             variant="h4"
@@ -234,6 +233,8 @@ const MessagesPage = () => {
         <Tabs
           value={filter}
           onChange={(_, v) => setFilter(v)}
+          variant="scrollable"
+          scrollButtons="auto"
           sx={{
             "& .MuiTab-root": {
               textTransform: "none",
@@ -287,7 +288,6 @@ const MessagesPage = () => {
         </Tabs>
       </Box>
 
-      {/* Content */}
       {loading ? (
         <Box className="flex justify-center mt-24">
           <CircularProgress sx={{ color: "#6366f1" }} />
@@ -356,7 +356,6 @@ const MessagesPage = () => {
               >
                 <CardContent sx={{ p: 3 }}>
                   <Box className="flex items-start justify-between gap-3">
-                    {/* Icon */}
                     <Box
                       className="flex items-center justify-center w-10 h-10 rounded-xl shrink-0"
                       sx={{
@@ -374,7 +373,6 @@ const MessagesPage = () => {
                       )}
                     </Box>
 
-                    {/* Content */}
                     <Box className="flex-1 min-w-0">
                       <Box className="flex items-center gap-2 mb-1 flex-wrap">
                         <Typography
@@ -503,7 +501,15 @@ const MessagesPage = () => {
         fullWidth
         slotProps={{ paper: { sx: { borderRadius: 3 } } }}
       >
-        <DialogTitle sx={{ fontWeight: 700, pb: 1, display: "flex", alignItems: "center", gap: 1 }}>
+        <DialogTitle
+          sx={{
+            fontWeight: 700,
+            pb: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
           <WarningAmberRoundedIcon sx={{ color: "#ef4444" }} />
           Excluir mensagem
         </DialogTitle>
@@ -532,7 +538,11 @@ const MessagesPage = () => {
               "&:hover": { background: "#dc2626" },
             }}
           >
-            {deleting ? <CircularProgress size={20} color="inherit" /> : "Excluir"}
+            {deleting ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              "Excluir"
+            )}
           </Button>
         </DialogActions>
       </Dialog>

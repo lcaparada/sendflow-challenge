@@ -143,7 +143,7 @@ const ContactsPage = () => {
 
   return (
     <Box sx={{ animation: "fadeUp 0.4s ease-out both" }}>
-      <Box className="flex items-center justify-between mb-8">
+      <Box className="flex items-center justify-between flex-wrap gap-3 mb-8">
         <Box>
           <Typography
             variant="h4"
@@ -250,7 +250,7 @@ const ContactsPage = () => {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
             gap: 2,
           }}
         >
