@@ -198,6 +198,7 @@ const LoginPage = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              placeholder="Digite seu e-mail"
               fullWidth
               autoFocus
               slotProps={{
@@ -223,6 +224,7 @@ const LoginPage = () => {
               label="Senha"
               type={showPassword ? "text" : "password"}
               value={password}
+              placeholder="******"
               onChange={(e) => setPassword(e.target.value)}
               required
               fullWidth
@@ -316,7 +318,6 @@ const LoginPage = () => {
           </Typography>
         </Box>
       </Box>
-
     </Box>
   );
 };
