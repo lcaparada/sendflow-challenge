@@ -23,6 +23,7 @@ import ContactsIcon from "@mui/icons-material/Contacts";
 import PersonIcon from "@mui/icons-material/Person";
 import PhoneIcon from "@mui/icons-material/Phone";
 import SearchIcon from "@mui/icons-material/Search";
+import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import type { Contact } from "../types";
@@ -55,6 +56,9 @@ const ContactsPage = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!user || !connectionId) return;
@@ -107,9 +111,17 @@ const ContactsPage = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Deseja excluir este contato?")) return;
-    await deleteContact(id);
+  const handleDelete = (id: string) => setDeleteTargetId(id);
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTargetId) return;
+    setDeleting(true);
+    try {
+      await deleteContact(deleteTargetId);
+      setDeleteTargetId(null);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const getInitials = (n: string) =>
@@ -324,6 +336,47 @@ const ContactsPage = () => {
           ))}
         </Box>
       )}
+
+      <Dialog
+        open={Boolean(deleteTargetId)}
+        onClose={() => setDeleteTargetId(null)}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{ paper: { sx: { borderRadius: 3 } } }}
+      >
+        <DialogTitle sx={{ fontWeight: 700, pb: 1, display: "flex", alignItems: "center", gap: 1 }}>
+          <WarningAmberRoundedIcon sx={{ color: "#ef4444" }} />
+          Excluir contato
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ color: "#6b7280" }}>
+            Tem certeza que deseja excluir este contato? Esta ação não pode ser
+            desfeita.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
+          <Button
+            onClick={() => setDeleteTargetId(null)}
+            sx={{ borderRadius: 2, textTransform: "none", color: "#6b7280" }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            variant="contained"
+            disabled={deleting}
+            sx={{
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: 600,
+              background: "#ef4444",
+              "&:hover": { background: "#dc2626" },
+            }}
+          >
+            {deleting ? <CircularProgress size={20} color="inherit" /> : "Excluir"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Dialog
         open={dialogOpen}

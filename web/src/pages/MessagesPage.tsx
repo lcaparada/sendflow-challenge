@@ -27,6 +27,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import SendIcon from "@mui/icons-material/Send";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import type { Contact, Message } from "../types";
@@ -64,6 +65,9 @@ const MessagesPage = () => {
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
   const [scheduledAt, setScheduledAt] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!user || !connectionId) return;
@@ -143,9 +147,17 @@ const MessagesPage = () => {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Deseja excluir esta mensagem?")) return;
-    await deleteMessage(id);
+  const handleDelete = (id: string) => setDeleteTargetId(id);
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTargetId) return;
+    setDeleting(true);
+    try {
+      await deleteMessage(deleteTargetId);
+      setDeleteTargetId(null);
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const toggleContact = (id: string) => {
@@ -474,6 +486,47 @@ const MessagesPage = () => {
           })}
         </Box>
       )}
+
+      <Dialog
+        open={Boolean(deleteTargetId)}
+        onClose={() => setDeleteTargetId(null)}
+        maxWidth="xs"
+        fullWidth
+        slotProps={{ paper: { sx: { borderRadius: 3 } } }}
+      >
+        <DialogTitle sx={{ fontWeight: 700, pb: 1, display: "flex", alignItems: "center", gap: 1 }}>
+          <WarningAmberRoundedIcon sx={{ color: "#ef4444" }} />
+          Excluir mensagem
+        </DialogTitle>
+        <DialogContent>
+          <Typography sx={{ color: "#6b7280" }}>
+            Tem certeza que deseja excluir esta mensagem? Esta ação não pode ser
+            desfeita.
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
+          <Button
+            onClick={() => setDeleteTargetId(null)}
+            sx={{ borderRadius: 2, textTransform: "none", color: "#6b7280" }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleConfirmDelete}
+            variant="contained"
+            disabled={deleting}
+            sx={{
+              borderRadius: 2,
+              textTransform: "none",
+              fontWeight: 600,
+              background: "#ef4444",
+              "&:hover": { background: "#dc2626" },
+            }}
+          >
+            {deleting ? <CircularProgress size={20} color="inherit" /> : "Excluir"}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Dialog */}
       <Dialog
