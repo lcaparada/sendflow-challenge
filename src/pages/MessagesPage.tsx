@@ -29,15 +29,14 @@ import ScheduleIcon from "@mui/icons-material/Schedule";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import type { Contact, Message } from "../../types";
+import type { Contact, Message } from "../types";
 import {
   createMessage,
   deleteMessage,
-  startMessageScheduler,
   subscribeToContacts,
   subscribeToMessages,
   updateMessage,
-} from "../../functions";
+} from "../functions";
 
 type FilterTab = "all" | "scheduled" | "sent";
 
@@ -69,23 +68,26 @@ const MessagesPage = () => {
   useEffect(() => {
     if (!user || !connectionId) return;
 
-    const unsubMessages = subscribeToMessages(user.uid, connectionId, (data) => {
-      setMessages(data);
-      setLoading(false);
-    });
+    const unsubMessages = subscribeToMessages(
+      user.uid,
+      connectionId,
+      (data) => {
+        setMessages(data);
+        setLoading(false);
+      },
+    );
 
-    const unsubContacts = subscribeToContacts(user.uid, connectionId, setContacts);
+    const unsubContacts = subscribeToContacts(
+      user.uid,
+      connectionId,
+      setContacts,
+    );
 
     return () => {
       unsubMessages();
       unsubContacts();
     };
   }, [user, connectionId]);
-
-  useEffect(() => {
-    const cleanup = startMessageScheduler(messages);
-    return cleanup;
-  }, [messages]);
 
   const filteredMessages = messages.filter((m) => {
     if (filter === "all") return true;
@@ -114,7 +116,13 @@ const MessagesPage = () => {
   };
 
   const handleSave = async () => {
-    if (!content.trim() || selectedContacts.length === 0 || !scheduledAt || !user || !connectionId)
+    if (
+      !content.trim() ||
+      selectedContacts.length === 0 ||
+      !scheduledAt ||
+      !user ||
+      !connectionId
+    )
       return;
     setSaving(true);
     try {
@@ -122,7 +130,12 @@ const MessagesPage = () => {
       if (editing) {
         await updateMessage(editing.id, selectedContacts, content.trim(), date);
       } else {
-        await createMessage(user.uid, connectionId, selectedContacts, content.trim(), date);
+        await createMessage(
+          connectionId,
+          selectedContacts,
+          content.trim(),
+          date,
+        );
       }
       closeDialog();
     } finally {
@@ -146,10 +159,16 @@ const MessagesPage = () => {
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
   };
 
-  const contactName = (id: string) => contacts.find((c) => c.id === id)?.name ?? id;
+  const contactName = (id: string) =>
+    contacts.find((c) => c.id === id)?.name ?? id;
 
   const getInitials = (n: string) =>
-    n.split(" ").slice(0, 2).map((w) => w[0]).join("").toUpperCase();
+    n
+      .split(" ")
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join("")
+      .toUpperCase();
 
   const tabCounts = {
     all: messages.length,
@@ -162,11 +181,16 @@ const MessagesPage = () => {
       {/* Header */}
       <Box className="flex items-center justify-between mb-6">
         <Box>
-          <Typography variant="h4" fontWeight={800} sx={{ color: "#1a1a2e", lineHeight: 1.2 }}>
+          <Typography
+            variant="h4"
+            fontWeight={800}
+            sx={{ color: "#1a1a2e", lineHeight: 1.2 }}
+          >
             Mensagens
           </Typography>
           <Typography variant="body2" sx={{ color: "#6b7280", mt: 0.5 }}>
-            {messages.length} mensagem{messages.length !== 1 ? "s" : ""} no total
+            {messages.length} mensagem{messages.length !== 1 ? "s" : ""} no
+            total
           </Typography>
         </Box>
         <Button
@@ -199,9 +223,18 @@ const MessagesPage = () => {
           value={filter}
           onChange={(_, v) => setFilter(v)}
           sx={{
-            "& .MuiTab-root": { textTransform: "none", fontWeight: 600, fontSize: 14, minHeight: 44 },
+            "& .MuiTab-root": {
+              textTransform: "none",
+              fontWeight: 600,
+              fontSize: 14,
+              minHeight: 44,
+            },
             "& .Mui-selected": { color: "#6366f1" },
-            "& .MuiTabs-indicator": { background: "linear-gradient(135deg, #6366f1, #a855f7)", height: 3, borderRadius: 2 },
+            "& .MuiTabs-indicator": {
+              background: "linear-gradient(135deg, #6366f1, #a855f7)",
+              height: 3,
+              borderRadius: 2,
+            },
           }}
         >
           {(["all", "scheduled", "sent"] as FilterTab[]).map((tab) => (
@@ -210,10 +243,19 @@ const MessagesPage = () => {
               value={tab}
               label={
                 <Box className="flex items-center gap-2">
-                  <span>{tab === "all" ? "Todas" : tab === "scheduled" ? "Agendadas" : "Enviadas"}</span>
+                  <span>
+                    {tab === "all"
+                      ? "Todas"
+                      : tab === "scheduled"
+                        ? "Agendadas"
+                        : "Enviadas"}
+                  </span>
                   <Box
                     sx={{
-                      background: filter === tab ? "linear-gradient(135deg, #6366f1, #a855f7)" : "#f3f4f6",
+                      background:
+                        filter === tab
+                          ? "linear-gradient(135deg, #6366f1, #a855f7)"
+                          : "#f3f4f6",
                       color: filter === tab ? "white" : "#9ca3af",
                       borderRadius: 10,
                       fontSize: 11,
@@ -249,11 +291,17 @@ const MessagesPage = () => {
           >
             <SendIcon sx={{ fontSize: 32, color: "#8b5cf6" }} />
           </Box>
-          <Typography variant="h6" fontWeight={700} sx={{ color: "#374151", mb: 1 }}>
+          <Typography
+            variant="h6"
+            fontWeight={700}
+            sx={{ color: "#374151", mb: 1 }}
+          >
             Nenhuma mensagem encontrada
           </Typography>
           <Typography variant="body2" sx={{ color: "#9ca3af", mb: 3 }}>
-            {filter === "all" ? "Crie a primeira mensagem desta conexão" : `Nenhuma mensagem ${filter === "scheduled" ? "agendada" : "enviada"} ainda`}
+            {filter === "all"
+              ? "Crie a primeira mensagem desta conexão"
+              : `Nenhuma mensagem ${filter === "scheduled" ? "agendada" : "enviada"} ainda`}
           </Typography>
           {filter === "all" && (
             <Button
@@ -265,7 +313,10 @@ const MessagesPage = () => {
                 textTransform: "none",
                 fontWeight: 600,
                 background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-                "&:hover": { background: "linear-gradient(135deg, #4f52e0 0%, #7c3aed 100%)" },
+                "&:hover": {
+                  background:
+                    "linear-gradient(135deg, #4f52e0 0%, #7c3aed 100%)",
+                },
               }}
             >
               Nova mensagem
@@ -303,7 +354,9 @@ const MessagesPage = () => {
                       }}
                     >
                       {isSent ? (
-                        <CheckCircleIcon sx={{ fontSize: 20, color: "#16a34a" }} />
+                        <CheckCircleIcon
+                          sx={{ fontSize: 20, color: "#16a34a" }}
+                        />
                       ) : (
                         <ScheduleIcon sx={{ fontSize: 20, color: "#d97706" }} />
                       )}
@@ -314,7 +367,11 @@ const MessagesPage = () => {
                       <Box className="flex items-center gap-2 mb-1 flex-wrap">
                         <Typography
                           fontWeight={600}
-                          sx={{ color: "#1a1a2e", fontSize: 15, lineHeight: 1.4 }}
+                          sx={{
+                            color: "#1a1a2e",
+                            fontSize: 15,
+                            lineHeight: 1.4,
+                          }}
                         >
                           {msg.content}
                         </Typography>
@@ -333,9 +390,13 @@ const MessagesPage = () => {
 
                       <Box className="flex items-center gap-1 mb-2">
                         {isSent ? (
-                          <CheckCircleIcon sx={{ fontSize: 13, color: "#9ca3af" }} />
+                          <CheckCircleIcon
+                            sx={{ fontSize: 13, color: "#9ca3af" }}
+                          />
                         ) : (
-                          <ScheduleIcon sx={{ fontSize: 13, color: "#9ca3af" }} />
+                          <ScheduleIcon
+                            sx={{ fontSize: 13, color: "#9ca3af" }}
+                          />
                         )}
                         <Typography variant="caption" sx={{ color: "#9ca3af" }}>
                           {isSent ? "Enviada em" : "Agendada para"}{" "}
@@ -354,12 +415,16 @@ const MessagesPage = () => {
                                 height: 20,
                                 fontSize: 9,
                                 fontWeight: 700,
-                                background: "linear-gradient(135deg, #6366f1, #a855f7)",
+                                background:
+                                  "linear-gradient(135deg, #6366f1, #a855f7)",
                               }}
                             >
                               {getInitials(contactName(id))}
                             </Avatar>
-                            <Typography variant="caption" sx={{ color: "#6b7280", fontWeight: 500 }}>
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "#6b7280", fontWeight: 500 }}
+                            >
                               {contactName(id)}
                             </Typography>
                           </Box>
@@ -374,7 +439,13 @@ const MessagesPage = () => {
                           <IconButton
                             size="small"
                             onClick={() => openEdit(msg)}
-                            sx={{ color: "#9ca3af", "&:hover": { color: "#6366f1", background: "#ede9fe" } }}
+                            sx={{
+                              color: "#9ca3af",
+                              "&:hover": {
+                                color: "#6366f1",
+                                background: "#ede9fe",
+                              },
+                            }}
                           >
                             <EditIcon sx={{ fontSize: 17 }} />
                           </IconButton>
@@ -384,7 +455,13 @@ const MessagesPage = () => {
                         <IconButton
                           size="small"
                           onClick={() => handleDelete(msg.id)}
-                          sx={{ color: "#9ca3af", "&:hover": { color: "#ef4444", background: "#fee2e2" } }}
+                          sx={{
+                            color: "#9ca3af",
+                            "&:hover": {
+                              color: "#ef4444",
+                              background: "#fee2e2",
+                            },
+                          }}
                         >
                           <DeleteIcon sx={{ fontSize: 17 }} />
                         </IconButton>
@@ -423,7 +500,11 @@ const MessagesPage = () => {
           />
           <Box>
             <Box className="flex items-center justify-between mb-1">
-              <Typography variant="body2" fontWeight={600} sx={{ color: "#374151" }}>
+              <Typography
+                variant="body2"
+                fontWeight={600}
+                sx={{ color: "#374151" }}
+              >
                 Data e hora de envio
               </Typography>
               <Button
@@ -456,7 +537,11 @@ const MessagesPage = () => {
           </Box>
 
           <Box>
-            <Typography variant="body2" fontWeight={600} sx={{ color: "#374151", mb: 1 }}>
+            <Typography
+              variant="body2"
+              fontWeight={600}
+              sx={{ color: "#374151", mb: 1 }}
+            >
               Contatos{" "}
               {selectedContacts.length > 0 && (
                 <Chip
@@ -481,7 +566,11 @@ const MessagesPage = () => {
             ) : (
               <Box
                 className="flex flex-col gap-1 rounded-xl p-2"
-                sx={{ border: "1px solid #f0f0f0", maxHeight: 200, overflowY: "auto" }}
+                sx={{
+                  border: "1px solid #f0f0f0",
+                  maxHeight: 200,
+                  overflowY: "auto",
+                }}
               >
                 {contacts.map((contact) => {
                   const checked = selectedContacts.includes(contact.id);
@@ -516,16 +605,29 @@ const MessagesPage = () => {
                             {getInitials(contact.name)}
                           </Avatar>
                           <Box>
-                            <Typography variant="body2" fontWeight={600} sx={{ lineHeight: 1.2 }}>
+                            <Typography
+                              variant="body2"
+                              fontWeight={600}
+                              sx={{ lineHeight: 1.2 }}
+                            >
                               {contact.name}
                             </Typography>
-                            <Typography variant="caption" sx={{ color: "#9ca3af" }}>
+                            <Typography
+                              variant="caption"
+                              sx={{ color: "#9ca3af" }}
+                            >
                               {contact.phone}
                             </Typography>
                           </Box>
                         </Box>
                       }
-                      sx={{ mx: 0, px: 1, py: 0.5, borderRadius: 1.5, "&:hover": { background: "#fafafa" } }}
+                      sx={{
+                        mx: 0,
+                        px: 1,
+                        py: 0.5,
+                        borderRadius: 1.5,
+                        "&:hover": { background: "#fafafa" },
+                      }}
                     />
                   );
                 })}
@@ -543,13 +645,20 @@ const MessagesPage = () => {
           <Button
             onClick={handleSave}
             variant="contained"
-            disabled={!content.trim() || selectedContacts.length === 0 || !scheduledAt || saving}
+            disabled={
+              !content.trim() ||
+              selectedContacts.length === 0 ||
+              !scheduledAt ||
+              saving
+            }
             sx={{
               borderRadius: 2,
               textTransform: "none",
               fontWeight: 600,
               background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-              "&:hover": { background: "linear-gradient(135deg, #4f52e0 0%, #7c3aed 100%)" },
+              "&:hover": {
+                background: "linear-gradient(135deg, #4f52e0 0%, #7c3aed 100%)",
+              },
             }}
           >
             {saving ? <CircularProgress size={20} color="inherit" /> : "Salvar"}

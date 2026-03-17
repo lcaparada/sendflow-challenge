@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import Layout from "../../web/components/Layout";
+import Layout from "../../components/Layout";
 
 const mockNavigate = vi.fn();
 
@@ -20,14 +20,29 @@ const renderAtPath = (path: string) =>
   render(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
-        <Route path="/connections" element={<Layout><div>Page Content</div></Layout>} />
+        <Route
+          path="/connections"
+          element={
+            <Layout>
+              <div>Page Content</div>
+            </Layout>
+          }
+        />
         <Route
           path="/connections/:connectionId/contacts"
-          element={<Layout><div>Page Content</div></Layout>}
+          element={
+            <Layout>
+              <div>Page Content</div>
+            </Layout>
+          }
         />
         <Route
           path="/connections/:connectionId/messages"
-          element={<Layout><div>Page Content</div></Layout>}
+          element={
+            <Layout>
+              <div>Page Content</div>
+            </Layout>
+          }
         />
         <Route path="/login" element={<div>Login</div>} />
       </Routes>

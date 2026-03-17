@@ -19,7 +19,7 @@ import {
   PersonAdd,
 } from "@mui/icons-material";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
-import { register } from "../../functions/auth";
+import { register } from "../functions/auth";
 
 const textFieldSx = {
   "& .MuiOutlinedInput-root": {

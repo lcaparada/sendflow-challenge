@@ -14,7 +14,7 @@ import HubIcon from "@mui/icons-material/Hub";
 import ContactsIcon from "@mui/icons-material/Contacts";
 import SendIcon from "@mui/icons-material/Send";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { logout } from "../../functions/auth";
+import { logout } from "../functions/auth";
 import type { ReactNode } from "react";
 
 const DRAWER_WIDTH = 240;

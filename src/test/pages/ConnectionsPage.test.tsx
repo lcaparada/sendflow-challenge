@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import ConnectionsPage from "../../web/pages/ConnectionsPage";
+import ConnectionsPage from "../../pages/ConnectionsPage";
 import type { Connection } from "../../types";
 
 const mockNavigate = vi.fn();
@@ -70,7 +70,9 @@ describe("ConnectionsPage", () => {
 
   it("opens create dialog when clicking the button", async () => {
     renderWithConnections([]);
-    fireEvent.click(screen.getAllByRole("button", { name: /nova conexão/i })[0]);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /nova conexão/i })[0],
+    );
     await waitFor(() => {
       expect(screen.getByRole("dialog")).toBeInTheDocument();
     });
@@ -78,7 +80,9 @@ describe("ConnectionsPage", () => {
 
   it("calls createConnection on save", async () => {
     renderWithConnections([]);
-    fireEvent.click(screen.getAllByRole("button", { name: /nova conexão/i })[0]);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /nova conexão/i })[0],
+    );
 
     await waitFor(() => screen.getByLabelText(/nome da conexão/i));
     fireEvent.change(screen.getByLabelText(/nome da conexão/i), {

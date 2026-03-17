@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import RegisterPage from "../../web/pages/RegisterPage";
+import RegisterPage from "../../pages/RegisterPage";
 
 const mockNavigate = vi.fn();
 
@@ -81,13 +81,17 @@ describe("RegisterPage", () => {
   });
 
   it("shows error when Firebase registration fails", async () => {
-    vi.mocked(register).mockRejectedValueOnce(new Error("email already in use"));
+    vi.mocked(register).mockRejectedValueOnce(
+      new Error("email already in use"),
+    );
     renderPage();
     fillForm("existing@test.com", "123456", "123456");
     fireEvent.click(screen.getByRole("button", { name: /cadastrar/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/não foi possível criar a conta/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/não foi possível criar a conta/i),
+      ).toBeInTheDocument();
     });
     expect(mockNavigate).not.toHaveBeenCalled();
   });

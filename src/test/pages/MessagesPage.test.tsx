@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import MessagesPage from "../../web/pages/MessagesPage";
+import MessagesPage from "../../pages/MessagesPage";
 import type { Contact, Message } from "../../types";
 
 vi.mock("../../web/hooks/useAuth", () => ({
@@ -46,22 +46,26 @@ const makeMessage = (overrides: Partial<Message> = {}): Message => ({
   ...overrides,
 });
 
-const renderWithData = (
-  messages: Message[] = [],
-  contacts: Contact[] = [],
-) => {
-  vi.mocked(subscribeToMessages).mockImplementation((_uid, _connId, callback) => {
-    callback(messages);
-    return vi.fn();
-  });
-  vi.mocked(subscribeToContacts).mockImplementation((_uid, _connId, callback) => {
-    callback(contacts);
-    return vi.fn();
-  });
+const renderWithData = (messages: Message[] = [], contacts: Contact[] = []) => {
+  vi.mocked(subscribeToMessages).mockImplementation(
+    (_uid, _connId, callback) => {
+      callback(messages);
+      return vi.fn();
+    },
+  );
+  vi.mocked(subscribeToContacts).mockImplementation(
+    (_uid, _connId, callback) => {
+      callback(contacts);
+      return vi.fn();
+    },
+  );
   return render(
     <MemoryRouter initialEntries={["/connections/conn-1/messages"]}>
       <Routes>
-        <Route path="/connections/:connectionId/messages" element={<MessagesPage />} />
+        <Route
+          path="/connections/:connectionId/messages"
+          element={<MessagesPage />}
+        />
       </Routes>
     </MemoryRouter>,
   );
@@ -74,7 +78,9 @@ describe("MessagesPage", () => {
 
   it("shows empty state when there are no messages", () => {
     renderWithData([], []);
-    expect(screen.getByText(/nenhuma mensagem encontrada/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/nenhuma mensagem encontrada/i),
+    ).toBeInTheDocument();
   });
 
   it("renders a list of messages", () => {
@@ -126,7 +132,9 @@ describe("MessagesPage", () => {
 
   it("opens create dialog when clicking the button", async () => {
     renderWithData([], []);
-    fireEvent.click(screen.getAllByRole("button", { name: /nova mensagem/i })[0]);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /nova mensagem/i })[0],
+    );
     await waitFor(() => {
       expect(screen.getByRole("dialog")).toBeInTheDocument();
     });
@@ -146,7 +154,9 @@ describe("MessagesPage", () => {
     const contact = makeContact({ id: "contact-1", name: "Alice" });
     renderWithData([], [contact]);
 
-    fireEvent.click(screen.getAllByRole("button", { name: /nova mensagem/i })[0]);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /nova mensagem/i })[0],
+    );
     await waitFor(() => screen.getByRole("textbox", { name: /mensagem/i }));
 
     fireEvent.change(screen.getByRole("textbox", { name: /mensagem/i }), {

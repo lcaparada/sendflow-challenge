@@ -13,70 +13,93 @@ import {
   Typography,
   Card,
   CardContent,
-  Chip,
+  Avatar,
+  InputAdornment,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import HubIcon from "@mui/icons-material/Hub";
-import { useNavigate } from "react-router-dom";
+import ContactsIcon from "@mui/icons-material/Contacts";
+import PersonIcon from "@mui/icons-material/Person";
+import PhoneIcon from "@mui/icons-material/Phone";
+import SearchIcon from "@mui/icons-material/Search";
+import { useParams } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import type { Connection } from "../../types";
+import type { Contact } from "../types";
 import {
-  createConnection,
-  deleteConnection,
-  subscribeToConnections,
-  updateConnection,
-} from "../../functions";
+  createContact,
+  deleteContact,
+  subscribeToContacts,
+  updateContact,
+} from "../functions";
 
-const ConnectionsPage = () => {
+const textFieldSx = {
+  "& .MuiOutlinedInput-root": {
+    borderRadius: 2,
+    "&:hover fieldset": { borderColor: "#6366f1" },
+    "&.Mui-focused fieldset": { borderColor: "#6366f1" },
+  },
+  "& label.Mui-focused": { color: "#6366f1" },
+};
+
+const ContactsPage = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const { connectionId } = useParams<{ connectionId: string }>();
 
-  const [connections, setConnections] = useState<Connection[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<Connection | null>(null);
+  const [editing, setEditing] = useState<Contact | null>(null);
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
-    const unsubscribe = subscribeToConnections(user.uid, (data) => {
-      setConnections(data);
+    if (!user || !connectionId) return;
+    const unsubscribe = subscribeToContacts(user.uid, connectionId, (data) => {
+      setContacts(data);
       setLoading(false);
     });
     return unsubscribe;
-  }, [user]);
+  }, [user, connectionId]);
+
+  const filtered = contacts.filter(
+    (c) =>
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.phone.includes(search),
+  );
 
   const openCreate = () => {
     setEditing(null);
     setName("");
+    setPhone("");
     setDialogOpen(true);
   };
 
-  const openEdit = (connection: Connection) => {
-    setEditing(connection);
-    setName(connection.name);
+  const openEdit = (contact: Contact) => {
+    setEditing(contact);
+    setName(contact.name);
+    setPhone(contact.phone);
     setDialogOpen(true);
   };
 
   const closeDialog = () => {
     setDialogOpen(false);
-    setName("");
     setEditing(null);
+    setName("");
+    setPhone("");
   };
 
   const handleSave = async () => {
-    if (!name.trim() || !user) return;
+    if (!name.trim() || !phone.trim() || !user || !connectionId) return;
     setSaving(true);
     try {
       if (editing) {
-        await updateConnection(editing.id, name.trim());
+        await updateContact(editing.id, name.trim(), phone.trim());
       } else {
-        await createConnection(user.uid, name.trim());
+        await createContact(connectionId, name.trim(), phone.trim());
       }
       closeDialog();
     } finally {
@@ -85,9 +108,17 @@ const ConnectionsPage = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Deseja excluir esta conexão?")) return;
-    await deleteConnection(id);
+    if (!confirm("Deseja excluir este contato?")) return;
+    await deleteContact(id);
   };
+
+  const getInitials = (n: string) =>
+    n
+      .split(" ")
+      .slice(0, 2)
+      .map((w) => w[0])
+      .join("")
+      .toUpperCase();
 
   return (
     <Box sx={{ animation: "fadeUp 0.4s ease-out both" }}>
@@ -98,11 +129,11 @@ const ConnectionsPage = () => {
             fontWeight={800}
             sx={{ color: "#1a1a2e", lineHeight: 1.2 }}
           >
-            Conexões
+            Contatos
           </Typography>
           <Typography variant="body2" sx={{ color: "#6b7280", mt: 0.5 }}>
-            {connections.length} conexão{connections.length !== 1 ? "es" : ""}{" "}
-            cadastrada{connections.length !== 1 ? "s" : ""}
+            {contacts.length} contato{contacts.length !== 1 ? "s" : ""}{" "}
+            cadastrado{contacts.length !== 1 ? "s" : ""}
           </Typography>
         </Box>
         <Button
@@ -125,15 +156,34 @@ const ConnectionsPage = () => {
             transition: "all 0.2s ease",
           }}
         >
-          Nova conexão
+          Novo contato
         </Button>
       </Box>
+
+      {!loading && contacts.length > 0 && (
+        <TextField
+          placeholder="Buscar por nome ou telefone..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          size="small"
+          sx={{ mb: 4, width: "100%", ...textFieldSx }}
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: "#9ca3af", fontSize: 20 }} />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
+      )}
 
       {loading ? (
         <Box className="flex justify-center mt-24">
           <CircularProgress sx={{ color: "#6366f1" }} />
         </Box>
-      ) : connections.length === 0 ? (
+      ) : contacts.length === 0 ? (
         <Box
           className="flex flex-col items-center justify-center py-24 rounded-2xl"
           sx={{ border: "2px dashed #e5e7eb", background: "#fafafa" }}
@@ -142,17 +192,17 @@ const ConnectionsPage = () => {
             className="flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
             sx={{ background: "linear-gradient(135deg, #ede9fe, #f3e8ff)" }}
           >
-            <HubIcon sx={{ fontSize: 32, color: "#8b5cf6" }} />
+            <ContactsIcon sx={{ fontSize: 32, color: "#8b5cf6" }} />
           </Box>
           <Typography
             variant="h6"
             fontWeight={700}
             sx={{ color: "#374151", mb: 1 }}
           >
-            Nenhuma conexão ainda
+            Nenhum contato ainda
           </Typography>
           <Typography variant="body2" sx={{ color: "#9ca3af", mb: 3 }}>
-            Crie sua primeira conexão para começar
+            Adicione o primeiro contato desta conexão
           </Typography>
           <Button
             variant="contained"
@@ -168,46 +218,52 @@ const ConnectionsPage = () => {
               },
             }}
           >
-            Nova conexão
+            Novo contato
           </Button>
         </Box>
+      ) : filtered.length === 0 ? (
+        <Typography sx={{ color: "#9ca3af", mt: 4 }}>
+          Nenhum resultado para "{search}"
+        </Typography>
       ) : (
         <Box
-          className="grid gap-4"
           sx={{
-            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
             display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+            gap: 2,
           }}
         >
-          {connections.map((conn, i) => (
+          {filtered.map((contact, i) => (
             <Card
-              key={conn.id}
+              key={contact.id}
               sx={{
                 borderRadius: 3,
                 border: "1px solid #f0f0f0",
                 boxShadow: "0 2px 12px rgba(0,0,0,0.06)",
                 transition: "all 0.2s ease",
-                cursor: "pointer",
-                animation: `fadeUp 0.4s ease-out ${i * 0.05}s both`,
+                animation: `fadeUp 0.4s ease-out ${i * 0.04}s both`,
                 "&:hover": {
                   boxShadow: "0 8px 24px rgba(99,102,241,0.15)",
                   transform: "translateY(-2px)",
                   borderColor: "#c4b5fd",
                 },
               }}
-              onClick={() => navigate(`/connections/${conn.id}/contacts`)}
             >
               <CardContent sx={{ p: 3 }}>
-                <Box className="flex items-start justify-between">
-                  <Box className="flex items-center gap-3 flex-1 min-w-0">
-                    <Box
-                      className="flex items-center justify-center w-10 h-10 rounded-xl shrink-0"
+                <Box className="flex items-center justify-between">
+                  <Box className="flex items-center gap-3 min-w-0">
+                    <Avatar
                       sx={{
-                        background: "linear-gradient(135deg, #ede9fe, #f3e8ff)",
+                        width: 42,
+                        height: 42,
+                        background: "linear-gradient(135deg, #6366f1, #a855f7)",
+                        fontSize: 14,
+                        fontWeight: 700,
+                        shrink: 0,
                       }}
                     >
-                      <HubIcon sx={{ fontSize: 20, color: "#8b5cf6" }} />
-                    </Box>
+                      {getInitials(contact.name)}
+                    </Avatar>
                     <Box className="min-w-0">
                       <Typography
                         fontWeight={700}
@@ -219,22 +275,22 @@ const ConnectionsPage = () => {
                           whiteSpace: "nowrap",
                         }}
                       >
-                        {conn.name}
+                        {contact.name}
                       </Typography>
-                      <Typography variant="caption" sx={{ color: "#9ca3af" }}>
-                        Criada em {conn.createdAt.toLocaleDateString("pt-BR")}
-                      </Typography>
+                      <Box className="flex items-center gap-1 mt-0.5">
+                        <PhoneIcon sx={{ fontSize: 13, color: "#9ca3af" }} />
+                        <Typography variant="caption" sx={{ color: "#6b7280" }}>
+                          {contact.phone}
+                        </Typography>
+                      </Box>
                     </Box>
                   </Box>
 
-                  <Box
-                    className="flex gap-0.5 shrink-0 ml-2"
-                    onClick={(e) => e.stopPropagation()}
-                  >
+                  <Box className="flex gap-0.5 shrink-0 ml-2">
                     <Tooltip title="Editar">
                       <IconButton
                         size="small"
-                        onClick={() => openEdit(conn)}
+                        onClick={() => openEdit(contact)}
                         sx={{
                           color: "#9ca3af",
                           "&:hover": {
@@ -249,7 +305,7 @@ const ConnectionsPage = () => {
                     <Tooltip title="Excluir">
                       <IconButton
                         size="small"
-                        onClick={() => handleDelete(conn.id)}
+                        onClick={() => handleDelete(contact.id)}
                         sx={{
                           color: "#9ca3af",
                           "&:hover": {
@@ -261,36 +317,6 @@ const ConnectionsPage = () => {
                         <DeleteIcon sx={{ fontSize: 17 }} />
                       </IconButton>
                     </Tooltip>
-                  </Box>
-                </Box>
-
-                <Box
-                  className="flex items-center justify-between mt-4 pt-3"
-                  sx={{ borderTop: "1px solid #f3f4f6" }}
-                >
-                  <Chip
-                    label="Ativa"
-                    size="small"
-                    sx={{
-                      background: "#dcfce7",
-                      color: "#16a34a",
-                      fontWeight: 600,
-                      fontSize: 11,
-                      height: 22,
-                    }}
-                  />
-                  <Box
-                    className="flex items-center gap-1"
-                    sx={{ color: "#6366f1", fontSize: 13, fontWeight: 600 }}
-                  >
-                    <Typography
-                      variant="caption"
-                      fontWeight={600}
-                      sx={{ color: "#6366f1" }}
-                    >
-                      Acessar
-                    </Typography>
-                    <ArrowForwardIcon sx={{ fontSize: 14, color: "#6366f1" }} />
                   </Box>
                 </Box>
               </CardContent>
@@ -307,25 +333,43 @@ const ConnectionsPage = () => {
         slotProps={{ paper: { sx: { borderRadius: 3 } } }}
       >
         <DialogTitle sx={{ fontWeight: 700, pb: 1 }}>
-          {editing ? "Editar conexão" : "Nova conexão"}
+          {editing ? "Editar contato" : "Novo contato"}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent className="flex flex-col gap-2">
           <TextField
-            label="Nome da conexão"
+            label="Nome"
             value={name}
             onChange={(e) => setName(e.target.value)}
             fullWidth
             autoFocus
             margin="normal"
-            onKeyDown={(e) => e.key === "Enter" && handleSave()}
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: 2,
-                "&:hover fieldset": { borderColor: "#6366f1" },
-                "&.Mui-focused fieldset": { borderColor: "#6366f1" },
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonIcon sx={{ color: "#9ca3af", fontSize: 20 }} />
+                  </InputAdornment>
+                ),
               },
-              "& label.Mui-focused": { color: "#6366f1" },
             }}
+            sx={textFieldSx}
+          />
+          <TextField
+            label="Telefone"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            fullWidth
+            placeholder="+55 11 91234-5678"
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PhoneIcon sx={{ color: "#9ca3af", fontSize: 20 }} />
+                  </InputAdornment>
+                ),
+              },
+            }}
+            sx={textFieldSx}
           />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
@@ -338,7 +382,7 @@ const ConnectionsPage = () => {
           <Button
             onClick={handleSave}
             variant="contained"
-            disabled={!name.trim() || saving}
+            disabled={!name.trim() || !phone.trim() || saving}
             sx={{
               borderRadius: 2,
               textTransform: "none",
@@ -357,4 +401,4 @@ const ConnectionsPage = () => {
   );
 };
 
-export default ConnectionsPage;
+export default ContactsPage;

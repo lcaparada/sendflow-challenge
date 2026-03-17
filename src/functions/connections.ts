@@ -1,38 +1,31 @@
+import { httpsCallable } from "firebase/functions";
 import {
   collection,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
   query,
   where,
   onSnapshot,
-  serverTimestamp,
   type Unsubscribe,
 } from "firebase/firestore";
-import { db } from "../lib";
+import { db, fns } from "../lib";
 import type { Connection } from "../types";
 
-const COLLECTION = "connections";
-
-export const createConnection = (userId: string, name: string) =>
-  addDoc(collection(db, COLLECTION), {
-    userId,
-    name,
-    createdAt: serverTimestamp(),
-  });
+export const createConnection = (name: string) =>
+  httpsCallable(fns, "createConnection")({ name });
 
 export const updateConnection = (id: string, name: string) =>
-  updateDoc(doc(db, COLLECTION, id), { name });
+  httpsCallable(fns, "updateConnection")({ id, name });
 
 export const deleteConnection = (id: string) =>
-  deleteDoc(doc(db, COLLECTION, id));
+  httpsCallable(fns, "deleteConnection")({ id });
 
 export const subscribeToConnections = (
   userId: string,
   callback: (connections: Connection[]) => void,
 ): Unsubscribe => {
-  const q = query(collection(db, COLLECTION), where("userId", "==", userId));
+  const q = query(
+    collection(db, "connections"),
+    where("userId", "==", userId),
+  );
   return onSnapshot(q, (snapshot) => {
     const connections = snapshot.docs.map((d) => ({
       id: d.id,

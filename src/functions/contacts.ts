@@ -1,38 +1,25 @@
+import { httpsCallable } from "firebase/functions";
 import {
   collection,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
   query,
   where,
   onSnapshot,
-  serverTimestamp,
   type Unsubscribe,
 } from "firebase/firestore";
-import { db } from "../lib";
+import { db, fns } from "../lib";
 import type { Contact } from "../types";
 
-const COLLECTION = "contacts";
-
 export const createContact = (
-  userId: string,
   connectionId: string,
   name: string,
   phone: string,
-) =>
-  addDoc(collection(db, COLLECTION), {
-    userId,
-    connectionId,
-    name,
-    phone,
-    createdAt: serverTimestamp(),
-  });
+) => httpsCallable(fns, "createContact")({ connectionId, name, phone });
 
 export const updateContact = (id: string, name: string, phone: string) =>
-  updateDoc(doc(db, COLLECTION, id), { name, phone });
+  httpsCallable(fns, "updateContact")({ id, name, phone });
 
-export const deleteContact = (id: string) => deleteDoc(doc(db, COLLECTION, id));
+export const deleteContact = (id: string) =>
+  httpsCallable(fns, "deleteContact")({ id });
 
 export const subscribeToContacts = (
   userId: string,
@@ -40,7 +27,7 @@ export const subscribeToContacts = (
   callback: (contacts: Contact[]) => void,
 ): Unsubscribe => {
   const q = query(
-    collection(db, COLLECTION),
+    collection(db, "contacts"),
     where("userId", "==", userId),
     where("connectionId", "==", connectionId),
   );

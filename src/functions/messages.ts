@@ -1,35 +1,25 @@
+import { httpsCallable } from "firebase/functions";
 import {
   collection,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
   query,
   where,
   onSnapshot,
-  serverTimestamp,
   type Unsubscribe,
 } from "firebase/firestore";
-import { db } from "../lib";
+import { db, fns } from "../lib";
 import type { Message, MessageStatus } from "../types";
 
-const COLLECTION = "messages";
-
 export const createMessage = (
-  userId: string,
   connectionId: string,
   contactIds: string[],
   content: string,
   scheduledAt: Date,
 ) =>
-  addDoc(collection(db, COLLECTION), {
-    userId,
+  httpsCallable(fns, "createMessage")({
     connectionId,
     contactIds,
     content,
-    status: "scheduled" as MessageStatus,
-    scheduledAt,
-    createdAt: serverTimestamp(),
+    scheduledAt: scheduledAt.toISOString(),
   });
 
 export const updateMessage = (
@@ -38,16 +28,18 @@ export const updateMessage = (
   content: string,
   scheduledAt: Date,
 ) =>
-  updateDoc(doc(db, COLLECTION, id), {
+  httpsCallable(fns, "updateMessage")({
+    id,
     contactIds,
     content,
-    scheduledAt,
+    scheduledAt: scheduledAt.toISOString(),
   });
 
 export const updateMessageStatus = (id: string, status: MessageStatus) =>
-  updateDoc(doc(db, COLLECTION, id), { status });
+  httpsCallable(fns, "updateMessageStatus")({ id, status });
 
-export const deleteMessage = (id: string) => deleteDoc(doc(db, COLLECTION, id));
+export const deleteMessage = (id: string) =>
+  httpsCallable(fns, "deleteMessage")({ id });
 
 export const subscribeToMessages = (
   userId: string,
@@ -55,7 +47,7 @@ export const subscribeToMessages = (
   callback: (messages: Message[]) => void,
 ): Unsubscribe => {
   const q = query(
-    collection(db, COLLECTION),
+    collection(db, "messages"),
     where("userId", "==", userId),
     where("connectionId", "==", connectionId),
   );
@@ -68,21 +60,4 @@ export const subscribeToMessages = (
     })) as Message[];
     callback(messages);
   });
-};
-
-export const startMessageScheduler = (messages: Message[]): (() => void) => {
-  const timers: ReturnType<typeof setTimeout>[] = [];
-
-  messages
-    .filter((m) => m.status === "scheduled")
-    .forEach((m) => {
-      const delay = m.scheduledAt.getTime() - Date.now();
-      if (delay <= 0) {
-        updateMessageStatus(m.id, "sent");
-      } else {
-        timers.push(setTimeout(() => updateMessageStatus(m.id, "sent"), delay));
-      }
-    });
-
-  return () => timers.forEach(clearTimeout);
 };

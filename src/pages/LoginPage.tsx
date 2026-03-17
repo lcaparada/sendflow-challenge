@@ -18,7 +18,7 @@ import {
   Send,
 } from "@mui/icons-material";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
-import { login } from "../../functions/auth";
+import { login } from "../functions/auth";
 
 const LoginPage = () => {
   const navigate = useNavigate();

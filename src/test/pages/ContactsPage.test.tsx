@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import ContactsPage from "../../web/pages/ContactsPage";
+import ContactsPage from "../../pages/ContactsPage";
 import type { Contact } from "../../types";
 
 vi.mock("../../web/hooks/useAuth", () => ({
@@ -33,14 +33,19 @@ const makeContact = (overrides: Partial<Contact> = {}): Contact => ({
 });
 
 const renderWithContacts = (contacts: Contact[] = []) => {
-  vi.mocked(subscribeToContacts).mockImplementation((_uid, _connId, callback) => {
-    callback(contacts);
-    return vi.fn();
-  });
+  vi.mocked(subscribeToContacts).mockImplementation(
+    (_uid, _connId, callback) => {
+      callback(contacts);
+      return vi.fn();
+    },
+  );
   return render(
     <MemoryRouter initialEntries={["/connections/conn-1/contacts"]}>
       <Routes>
-        <Route path="/connections/:connectionId/contacts" element={<ContactsPage />} />
+        <Route
+          path="/connections/:connectionId/contacts"
+          element={<ContactsPage />}
+        />
       </Routes>
     </MemoryRouter>,
   );
@@ -81,7 +86,9 @@ describe("ContactsPage", () => {
 
   it("opens create dialog when clicking the button", async () => {
     renderWithContacts([]);
-    fireEvent.click(screen.getAllByRole("button", { name: /novo contato/i })[0]);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /novo contato/i })[0],
+    );
     await waitFor(() => {
       expect(screen.getByRole("dialog")).toBeInTheDocument();
     });
@@ -89,7 +96,9 @@ describe("ContactsPage", () => {
 
   it("calls createContact on save", async () => {
     renderWithContacts([]);
-    fireEvent.click(screen.getAllByRole("button", { name: /novo contato/i })[0]);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /novo contato/i })[0],
+    );
 
     await waitFor(() => screen.getByLabelText(/^nome/i));
     fireEvent.change(screen.getByLabelText(/^nome/i), {
@@ -111,7 +120,9 @@ describe("ContactsPage", () => {
   });
 
   it("opens edit dialog pre-filled with contact data", async () => {
-    renderWithContacts([makeContact({ name: "John Doe", phone: "+55 11 91234-5678" })]);
+    renderWithContacts([
+      makeContact({ name: "John Doe", phone: "+55 11 91234-5678" }),
+    ]);
 
     fireEvent.click(screen.getByRole("button", { name: "Editar" }));
 
@@ -122,7 +133,9 @@ describe("ContactsPage", () => {
   });
 
   it("calls updateContact on save when editing", async () => {
-    renderWithContacts([makeContact({ id: "contact-1", name: "Old Name", phone: "111" })]);
+    renderWithContacts([
+      makeContact({ id: "contact-1", name: "Old Name", phone: "111" }),
+    ]);
 
     fireEvent.click(screen.getByRole("button", { name: "Editar" }));
     await waitFor(() => screen.getByDisplayValue("Old Name"));
@@ -133,7 +146,11 @@ describe("ContactsPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /salvar/i }));
 
     await waitFor(() => {
-      expect(updateContact).toHaveBeenCalledWith("contact-1", "New Name", "111");
+      expect(updateContact).toHaveBeenCalledWith(
+        "contact-1",
+        "New Name",
+        "111",
+      );
     });
   });
 
