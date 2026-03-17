@@ -56,6 +56,7 @@ const ContactsPage = () => {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [saving, setSaving] = useState(false);
+  const [phoneError, setPhoneError] = useState("");
 
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -94,10 +95,18 @@ const ContactsPage = () => {
     setEditing(null);
     setName("");
     setPhone("");
+    setPhoneError("");
   };
 
   const handleSave = async () => {
     if (!name.trim() || !phone.trim() || !user || !connectionId) return;
+    const duplicate = contacts.find(
+      (c) => c.phone === phone.trim() && c.id !== editing?.id,
+    );
+    if (duplicate) {
+      setPhoneError("Este número já está cadastrado para outro contato.");
+      return;
+    }
     setSaving(true);
     try {
       if (editing) {
@@ -410,9 +419,11 @@ const ContactsPage = () => {
           <TextField
             label="Telefone"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => { setPhone(e.target.value); setPhoneError(""); }}
             fullWidth
             placeholder="+55 11 91234-5678"
+            error={!!phoneError}
+            helperText={phoneError}
             slotProps={{
               input: {
                 startAdornment: (

@@ -172,7 +172,7 @@ const MessagesPage = () => {
   };
 
   const contactName = (id: string) =>
-    contacts.find((c) => c.id === id)?.name ?? id;
+    contacts.find((c) => c.id === id)?.name ?? "Contato removido";
 
   const getInitials = (n: string) =>
     n
@@ -419,28 +419,37 @@ const MessagesPage = () => {
                       <Divider sx={{ mb: 2 }} />
 
                       <Box className="flex flex-wrap gap-1">
-                        {msg.contactIds.map((id) => (
-                          <Box key={id} className="flex items-center gap-1">
-                            <Avatar
-                              sx={{
-                                width: 20,
-                                height: 20,
-                                fontSize: 9,
-                                fontWeight: 700,
-                                background:
-                                  "linear-gradient(135deg, #6366f1, #a855f7)",
-                              }}
-                            >
-                              {getInitials(contactName(id))}
-                            </Avatar>
-                            <Typography
-                              variant="caption"
-                              sx={{ color: "#6b7280", fontWeight: 500 }}
-                            >
-                              {contactName(id)}
-                            </Typography>
-                          </Box>
-                        ))}
+                        {msg.contactIds.map((id) => {
+                          const name = contactName(id);
+                          const removed = name === "Contato removido";
+                          return (
+                            <Box key={id} className="flex items-center gap-1">
+                              <Avatar
+                                sx={{
+                                  width: 20,
+                                  height: 20,
+                                  fontSize: 9,
+                                  fontWeight: 700,
+                                  background: removed
+                                    ? "#e5e7eb"
+                                    : "linear-gradient(135deg, #6366f1, #a855f7)",
+                                }}
+                              >
+                                {removed ? "?" : getInitials(name)}
+                              </Avatar>
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color: removed ? "#9ca3af" : "#6b7280",
+                                  fontWeight: 500,
+                                  fontStyle: removed ? "italic" : "normal",
+                                }}
+                              >
+                                {name}
+                              </Typography>
+                            </Box>
+                          );
+                        })}
                       </Box>
                     </Box>
 
