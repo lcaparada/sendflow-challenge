@@ -32,7 +32,7 @@ export const createMessage = (
   connectionId: string,
   contactIds: string[],
   content: string,
-  scheduledAt: Date
+  scheduledAt: Date,
 ) =>
   addDoc(collection(db, COLLECTION), {
     userId,
@@ -48,7 +48,7 @@ export const updateMessage = (
   id: string,
   contactIds: string[],
   content: string,
-  scheduledAt: Date
+  scheduledAt: Date,
 ) =>
   updateDoc(doc(db, COLLECTION, id), {
     contactIds,
@@ -59,18 +59,17 @@ export const updateMessage = (
 export const updateMessageStatus = (id: string, status: MessageStatus) =>
   updateDoc(doc(db, COLLECTION, id), { status });
 
-export const deleteMessage = (id: string) =>
-  deleteDoc(doc(db, COLLECTION, id));
+export const deleteMessage = (id: string) => deleteDoc(doc(db, COLLECTION, id));
 
 export const subscribeToMessages = (
   userId: string,
   connectionId: string,
-  callback: (messages: Message[]) => void
+  callback: (messages: Message[]) => void,
 ): Unsubscribe => {
   const q = query(
     collection(db, COLLECTION),
     where("userId", "==", userId),
-    where("connectionId", "==", connectionId)
+    where("connectionId", "==", connectionId),
   );
   return onSnapshot(q, (snapshot) => {
     const messages = snapshot.docs.map((d) => ({
@@ -83,10 +82,7 @@ export const subscribeToMessages = (
   });
 };
 
-// Checks and fires scheduled messages whose time has passed
-export const startMessageScheduler = (
-  messages: Message[]
-): (() => void) => {
+export const startMessageScheduler = (messages: Message[]): (() => void) => {
   const timers: ReturnType<typeof setTimeout>[] = [];
 
   messages
