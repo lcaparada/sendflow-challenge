@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import HubIcon from "@mui/icons-material/Hub";
 import { useNavigate } from "react-router-dom";
@@ -24,7 +24,9 @@ import {
 const ConnectionsPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [connections, loading] = useConnections(user?.uid ?? "");
+  const [pageSize, setPageSize] = useState(20);
+  const [connections, loading] = useConnections(user?.uid ?? "", pageSize);
+  const hasMore = connections.length === pageSize;
 
   const [formDialog, setFormDialog] = useState<{
     connection: ConnectionType | null;
@@ -95,6 +97,23 @@ const ConnectionsPage = () => {
               onDelete={(id) => setDeleteDialog({ id, loading: false })}
             />
           ))}
+          {hasMore && (
+            <Button
+              variant="outlined"
+              onClick={() => setPageSize((prev) => prev + 20)}
+              sx={{
+                gridColumn: "1 / -1",
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: 600,
+                borderColor: "#c4b5fd",
+                color: "#6366f1",
+                "&:hover": { borderColor: "#6366f1", background: "#ede9fe" },
+              }}
+            >
+              Carregar mais
+            </Button>
+          )}
         </Box>
       )}
 

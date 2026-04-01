@@ -4,6 +4,8 @@ import {
   deleteDoc,
   doc,
   getDocs,
+  limit,
+  orderBy,
   query,
   serverTimestamp,
   updateDoc,
@@ -88,21 +90,33 @@ export async function searchContacts(
   return results;
 }
 
-export function getContacts(userId: string, connectionId: string) {
+const PAGE_SIZE = 20;
+
+export function getContacts(
+  userId: string,
+  connectionId: string,
+  pageSize = PAGE_SIZE,
+) {
   return collectionData(
     query(
       collection(db, DB_COLLECTION),
       where("userId", "==", userId),
       where("connectionId", "==", connectionId),
+      orderBy("createdAt", "desc"),
+      limit(pageSize),
     ),
     { idField: "id" },
   ) as Observable<ContactType[]>;
 }
 
-export function useContacts(userId: string, connectionId: string) {
+export function useContacts(
+  userId: string,
+  connectionId: string,
+  pageSize = PAGE_SIZE,
+) {
   const observable = useMemo(
-    () => getContacts(userId, connectionId),
-    [userId, connectionId],
+    () => getContacts(userId, connectionId, pageSize),
+    [userId, connectionId, pageSize],
   );
   return useObservable<ContactType>(observable);
 }

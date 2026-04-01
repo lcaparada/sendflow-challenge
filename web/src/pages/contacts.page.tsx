@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import { Box, Button, CircularProgress, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import ContactsIcon from "@mui/icons-material/Contacts";
 import { useParams } from "react-router-dom";
@@ -25,7 +25,9 @@ import {
 const ContactsPage = () => {
   const { user } = useAuth();
   const { connectionId } = useParams<{ connectionId: string }>();
-  const [contacts, loading] = useContacts(user?.uid ?? "", connectionId ?? "");
+  const [pageSize, setPageSize] = useState(20);
+  const [contacts, loading] = useContacts(user?.uid ?? "", connectionId ?? "", pageSize);
+  const hasMore = contacts.length === pageSize;
 
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState<ContactType[]>([]);
@@ -133,6 +135,23 @@ const ContactsPage = () => {
               onDelete={(id) => setDeleteDialog({ id, loading: false })}
             />
           ))}
+          {hasMore && !search.trim() && (
+            <Button
+              variant="outlined"
+              onClick={() => setPageSize((prev) => prev + 20)}
+              sx={{
+                gridColumn: "1 / -1",
+                borderRadius: 2,
+                textTransform: "none",
+                fontWeight: 600,
+                borderColor: "#c4b5fd",
+                color: "#6366f1",
+                "&:hover": { borderColor: "#6366f1", background: "#ede9fe" },
+              }}
+            >
+              Carregar mais
+            </Button>
+          )}
         </Box>
       )}
 

@@ -3,6 +3,8 @@ import {
   collection,
   deleteDoc,
   doc,
+  limit,
+  orderBy,
   query,
   serverTimestamp,
   updateDoc,
@@ -33,14 +35,24 @@ export function deleteConnection(id: string) {
   return deleteDoc(doc(collection(db, DB_COLLECTION), id));
 }
 
-export function getConnections(userId: string) {
+const PAGE_SIZE = 20;
+
+export function getConnections(userId: string, pageSize = PAGE_SIZE) {
   return collectionData(
-    query(collection(db, DB_COLLECTION), where("userId", "==", userId)),
+    query(
+      collection(db, DB_COLLECTION),
+      where("userId", "==", userId),
+      orderBy("createdAt", "desc"),
+      limit(pageSize),
+    ),
     { idField: "id" },
   ) as Observable<ConnectionType[]>;
 }
 
-export function useConnections(userId: string) {
-  const observable = useMemo(() => getConnections(userId), [userId]);
+export function useConnections(userId: string, pageSize = PAGE_SIZE) {
+  const observable = useMemo(
+    () => getConnections(userId, pageSize),
+    [userId, pageSize],
+  );
   return useObservable<ConnectionType>(observable);
 }
