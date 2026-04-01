@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom";
 import { CircularProgress, Box } from "@mui/material";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../hooks/use-auth";
 import type { ReactNode } from "react";
 
 type Props = {

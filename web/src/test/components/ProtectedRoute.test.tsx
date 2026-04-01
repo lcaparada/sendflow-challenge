@@ -7,7 +7,7 @@ vi.mock("../../web/hooks/useAuth", () => ({
   useAuth: vi.fn(),
 }));
 
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../hooks/use-auth";
 
 const renderProtectedRoute = () =>
   render(

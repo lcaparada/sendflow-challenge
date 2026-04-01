@@ -1,6 +1,6 @@
 export type MessageStatus = "scheduled" | "sent";
 
-export type Message = {
+export type MessageType = {
   id: string;
   userId: string;
   connectionId: string;

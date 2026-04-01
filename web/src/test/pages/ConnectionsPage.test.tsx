@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import ConnectionsPage from "../../pages/ConnectionsPage";
+import ConnectionsPage from "../../pages/connections.page";
 import type { Connection } from "../../types";
 
 const mockNavigate = vi.fn();

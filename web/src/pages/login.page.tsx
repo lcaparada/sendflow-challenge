@@ -21,7 +21,7 @@ import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { login } from "../functions/auth";
-import { loginSchema, type LoginSchemaType } from "../schemas";
+import { loginSchema, type LoginSchemaType } from "../modules";
 
 const textFieldSx = {
   "& .MuiOutlinedInput-root": {

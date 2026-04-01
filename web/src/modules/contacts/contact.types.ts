@@ -1,4 +1,4 @@
-export type Contact = {
+export type ContactType = {
   id: string;
   userId: string;
   connectionId: string;

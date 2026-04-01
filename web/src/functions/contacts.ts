@@ -7,7 +7,7 @@ import {
   type Unsubscribe,
 } from "firebase/firestore";
 import { db, fns } from "../lib";
-import type { Contact } from "../types";
+import type { ContactType } from "../modules";
 
 export const createContact = (
   connectionId: string,
@@ -24,7 +24,7 @@ export const deleteContact = (id: string) =>
 export const subscribeToContacts = (
   userId: string,
   connectionId: string,
-  callback: (contacts: Contact[]) => void,
+  callback: (contacts: ContactType[]) => void,
 ): Unsubscribe => {
   const q = query(
     collection(db, "contacts"),
@@ -36,7 +36,7 @@ export const subscribeToContacts = (
       id: d.id,
       ...d.data(),
       createdAt: d.data().createdAt?.toDate?.() ?? new Date(),
-    })) as Contact[];
+    })) as ContactType[];
     callback(contacts);
   });
 };

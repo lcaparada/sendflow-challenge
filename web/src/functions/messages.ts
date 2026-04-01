@@ -7,7 +7,7 @@ import {
   type Unsubscribe,
 } from "firebase/firestore";
 import { db, fns } from "../lib";
-import type { Message, MessageStatus } from "../types";
+import type { MessageStatus, MessageType } from "../modules";
 
 export const createMessage = (
   connectionId: string,
@@ -15,7 +15,10 @@ export const createMessage = (
   content: string,
   scheduledAt: Date,
 ) =>
-  httpsCallable(fns, "createMessage")({
+  httpsCallable(
+    fns,
+    "createMessage",
+  )({
     connectionId,
     contactIds,
     content,
@@ -28,7 +31,10 @@ export const updateMessage = (
   content: string,
   scheduledAt: Date,
 ) =>
-  httpsCallable(fns, "updateMessage")({
+  httpsCallable(
+    fns,
+    "updateMessage",
+  )({
     id,
     contactIds,
     content,
@@ -44,7 +50,7 @@ export const deleteMessage = (id: string) =>
 export const subscribeToMessages = (
   userId: string,
   connectionId: string,
-  callback: (messages: Message[]) => void,
+  callback: (messages: MessageType[]) => void,
 ): Unsubscribe => {
   const q = query(
     collection(db, "messages"),
@@ -57,7 +63,7 @@ export const subscribeToMessages = (
       ...d.data(),
       scheduledAt: d.data().scheduledAt?.toDate?.() ?? new Date(),
       createdAt: d.data().createdAt?.toDate?.() ?? new Date(),
-    })) as Message[];
+    })) as MessageType[];
     callback(messages);
   });
 };

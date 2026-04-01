@@ -24,24 +24,27 @@ import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "../hooks/useAuth";
-import type { Connection } from "../types";
+import { useAuth } from "../hooks/use-auth";
 import {
   createConnection,
   deleteConnection,
   subscribeToConnections,
   updateConnection,
 } from "../functions";
-import { connectionSchema, type ConnectionSchemaType } from "../schemas";
+import {
+  connectionSchema,
+  type ConnectionSchemaType,
+  type ConnectionType,
+} from "../modules";
 
 const ConnectionsPage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [connections, setConnections] = useState<Connection[]>([]);
+  const [connections, setConnections] = useState<ConnectionType[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<Connection | null>(null);
+  const [editing, setEditing] = useState<ConnectionType | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -69,7 +72,7 @@ const ConnectionsPage = () => {
     setDialogOpen(true);
   };
 
-  const openEdit = (connection: Connection) => {
+  const openEdit = (connection: ConnectionType) => {
     setEditing(connection);
     reset({ name: connection.name });
     setDialogOpen(true);
@@ -190,7 +193,8 @@ const ConnectionsPage = () => {
         <Box
           className="grid gap-4"
           sx={{
-            gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
+            gridTemplateColumns:
+              "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
             display: "grid",
           }}
         >
@@ -321,7 +325,15 @@ const ConnectionsPage = () => {
         fullWidth
         slotProps={{ paper: { sx: { borderRadius: 3 } } }}
       >
-        <DialogTitle sx={{ fontWeight: 700, pb: 1, display: "flex", alignItems: "center", gap: 1 }}>
+        <DialogTitle
+          sx={{
+            fontWeight: 700,
+            pb: 1,
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+          }}
+        >
           <WarningAmberRoundedIcon sx={{ color: "#ef4444" }} />
           Excluir conexão
         </DialogTitle>
@@ -350,7 +362,11 @@ const ConnectionsPage = () => {
               "&:hover": { background: "#dc2626" },
             }}
           >
-            {deleting ? <CircularProgress size={20} color="inherit" /> : "Excluir"}
+            {deleting ? (
+              <CircularProgress size={20} color="inherit" />
+            ) : (
+              "Excluir"
+            )}
           </Button>
         </DialogActions>
       </Dialog>
@@ -403,11 +419,16 @@ const ConnectionsPage = () => {
                 fontWeight: 600,
                 background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
                 "&:hover": {
-                  background: "linear-gradient(135deg, #4f52e0 0%, #7c3aed 100%)",
+                  background:
+                    "linear-gradient(135deg, #4f52e0 0%, #7c3aed 100%)",
                 },
               }}
             >
-              {isSubmitting ? <CircularProgress size={20} color="inherit" /> : "Salvar"}
+              {isSubmitting ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                "Salvar"
+              )}
             </Button>
           </DialogActions>
         </Box>

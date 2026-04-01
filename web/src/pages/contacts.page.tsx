@@ -28,15 +28,19 @@ import { useParams } from "react-router-dom";
 import { IMaskInput } from "react-imask";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "../hooks/useAuth";
-import type { Contact } from "../types";
-import { contactSchema, type ContactSchemaType } from "../schemas";
+import { useAuth } from "../hooks/use-auth";
+
 import {
   createContact,
   deleteContact,
   subscribeToContacts,
   updateContact,
 } from "../functions";
+import {
+  contactSchema,
+  type ContactSchemaType,
+  type ContactType,
+} from "../modules";
 
 const textFieldSx = {
   "& .MuiOutlinedInput-root": {
@@ -51,11 +55,11 @@ const ContactsPage = () => {
   const { user } = useAuth();
   const { connectionId } = useParams<{ connectionId: string }>();
 
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [contacts, setContacts] = useState<ContactType[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<Contact | null>(null);
+  const [editing, setEditing] = useState<ContactType | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -91,7 +95,7 @@ const ContactsPage = () => {
     setDialogOpen(true);
   };
 
-  const openEdit = (contact: Contact) => {
+  const openEdit = (contact: ContactType) => {
     setEditing(contact);
     reset({ name: contact.name, phone: contact.phone });
     setDialogOpen(true);

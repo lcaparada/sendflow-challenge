@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import MessagesPage from "../../pages/MessagesPage";
+import MessagesPage from "../../pages/messages.page";
 import type { Contact, Message } from "../../types";
 
 vi.mock("../../web/hooks/useAuth", () => ({
