@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { Observable } from "rxjs";
 
-export function useObservable<T>(observable: Observable<T>) {
-  const [data, setData] = useState<T | null>(null);
+export function useObservable<T>(observable: Observable<T[]>) {
+  const [data, setData] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

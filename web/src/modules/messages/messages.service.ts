@@ -71,5 +71,5 @@ export function useMessages(userId: string, connectionId: string) {
     () => getMessages(userId, connectionId),
     [userId, connectionId],
   );
-  return useObservable(observable);
+  return useObservable<MessageType>(observable);
 }
