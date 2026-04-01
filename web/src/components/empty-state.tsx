@@ -1,12 +1,21 @@
 import { Box, Button, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
-import ContactsIcon from "@mui/icons-material/Contacts";
 
-type ContactEmptyStateProps = {
+type EmptyStateProps = {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+  addLabel: string;
   onAdd: () => void;
 };
 
-export function ContactEmptyState({ onAdd }: ContactEmptyStateProps) {
+export function EmptyState({
+  icon,
+  title,
+  description,
+  addLabel,
+  onAdd,
+}: EmptyStateProps) {
   return (
     <Box
       className="flex flex-col items-center justify-center py-24 rounded-2xl"
@@ -16,17 +25,13 @@ export function ContactEmptyState({ onAdd }: ContactEmptyStateProps) {
         className="flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
         sx={{ background: "linear-gradient(135deg, #ede9fe, #f3e8ff)" }}
       >
-        <ContactsIcon sx={{ fontSize: 32, color: "#8b5cf6" }} />
+        {icon}
       </Box>
-      <Typography
-        variant="h6"
-        fontWeight={700}
-        sx={{ color: "#374151", mb: 1 }}
-      >
-        Nenhum contato ainda
+      <Typography variant="h6" fontWeight={700} sx={{ color: "#374151", mb: 1 }}>
+        {title}
       </Typography>
       <Typography variant="body2" sx={{ color: "#9ca3af", mb: 3 }}>
-        Adicione o primeiro contato desta conexão
+        {description}
       </Typography>
       <Button
         variant="contained"
@@ -42,7 +47,7 @@ export function ContactEmptyState({ onAdd }: ContactEmptyStateProps) {
           },
         }}
       >
-        Novo contato
+        {addLabel}
       </Button>
     </Box>
   );

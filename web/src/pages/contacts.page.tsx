@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import ContactsIcon from "@mui/icons-material/Contacts";
 import { useParams } from "react-router-dom";
 import {
   checkPhoneDuplicate,
@@ -14,10 +15,10 @@ import {
 } from "../modules";
 import { useAuth } from "../hooks";
 import {
+  ConfirmDialog,
   ContactCard,
-  ContactEmptyState,
   ContactFormDialog,
-  DeleteContactDialog,
+  EmptyState,
   PageWrapper,
 } from "../components";
 
@@ -29,8 +30,13 @@ const ContactsPage = () => {
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState<ContactType[]>([]);
   const [searching, setSearching] = useState(false);
-  const [formDialog, setFormDialog] = useState<{ contact: ContactType | null } | null>(null);
-  const [deleteDialog, setDeleteDialog] = useState<{ id: string; loading: boolean } | null>(null);
+  const [formDialog, setFormDialog] = useState<{
+    contact: ContactType | null;
+  } | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    id: string;
+    loading: boolean;
+  } | null>(null);
 
   const displayed = search.trim() ? searchResults : contacts;
 
@@ -70,7 +76,11 @@ const ContactsPage = () => {
     if (!search.trim() || !user || !connectionId) return;
     const timeout = setTimeout(async () => {
       setSearching(true);
-      const results = await searchContacts(user.uid, connectionId, search.trim());
+      const results = await searchContacts(
+        user.uid,
+        connectionId,
+        search.trim(),
+      );
       setSearchResults(results);
       setSearching(false);
     }, 300);
@@ -94,7 +104,13 @@ const ContactsPage = () => {
           <CircularProgress sx={{ color: "#6366f1" }} />
         </Box>
       ) : contacts.length === 0 ? (
-        <ContactEmptyState onAdd={openCreate} />
+        <EmptyState
+          icon={<ContactsIcon sx={{ fontSize: 32, color: "#8b5cf6" }} />}
+          title="Nenhum contato ainda"
+          description="Crie seu primeiro contato para começar"
+          addLabel="Novo contato"
+          onAdd={openCreate}
+        />
       ) : displayed.length === 0 ? (
         <Typography sx={{ color: "#9ca3af", mt: 4 }}>
           Nenhum resultado para "{search}"
@@ -127,9 +143,11 @@ const ContactsPage = () => {
         onSubmit={onSubmit}
       />
 
-      <DeleteContactDialog
+      <ConfirmDialog
         open={deleteDialog !== null}
-        deleting={deleteDialog?.loading ?? false}
+        loading={deleteDialog?.loading ?? false}
+        title="Excluir contato"
+        description="Tem certeza que deseja excluir este contato? Esta ação não pode ser desfeita."
         onClose={() => setDeleteDialog(null)}
         onConfirm={handleConfirmDelete}
       />

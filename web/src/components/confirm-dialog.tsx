@@ -9,19 +9,25 @@ import {
 } from "@mui/material";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 
-type DeleteContactDialogProps = {
+type ConfirmDialogProps = {
   open: boolean;
-  deleting: boolean;
+  loading: boolean;
+  title: string;
+  description: string;
+  confirmLabel?: string;
   onClose: () => void;
   onConfirm: () => Promise<void>;
 };
 
-export function DeleteContactDialog({
+export function ConfirmDialog({
   open,
-  deleting,
+  loading,
+  title,
+  description,
+  confirmLabel = "Excluir",
   onClose,
   onConfirm,
-}: DeleteContactDialogProps) {
+}: ConfirmDialogProps) {
   return (
     <Dialog
       open={open}
@@ -40,13 +46,10 @@ export function DeleteContactDialog({
         }}
       >
         <WarningAmberRoundedIcon sx={{ color: "#ef4444" }} />
-        Excluir contato
+        {title}
       </DialogTitle>
       <DialogContent>
-        <Typography sx={{ color: "#6b7280" }}>
-          Tem certeza que deseja excluir este contato? Esta ação não pode ser
-          desfeita.
-        </Typography>
+        <Typography sx={{ color: "#6b7280" }}>{description}</Typography>
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
         <Button
@@ -58,7 +61,7 @@ export function DeleteContactDialog({
         <Button
           onClick={onConfirm}
           variant="contained"
-          disabled={deleting}
+          disabled={loading}
           sx={{
             borderRadius: 2,
             textTransform: "none",
@@ -67,10 +70,10 @@ export function DeleteContactDialog({
             "&:hover": { background: "#dc2626" },
           }}
         >
-          {deleting ? (
+          {loading ? (
             <CircularProgress size={20} color="inherit" />
           ) : (
-            "Excluir"
+            confirmLabel
           )}
         </Button>
       </DialogActions>
