@@ -22,7 +22,7 @@ import {
   type MessageSchemaType,
   type MessageType,
 } from "../../modules";
-import { formatToDatetimeLocal, getInitials } from "../../utils";
+import { formatToDatetimeLocal, getInitials, toDate } from "../../utils";
 
 const textFieldSx = {
   "& .MuiOutlinedInput-root": {
@@ -68,7 +68,7 @@ export function MessageFormDialog({
         editing
           ? {
               content: editing.content,
-              scheduledAt: formatToDatetimeLocal(editing.scheduledAt),
+              scheduledAt: formatToDatetimeLocal(toDate(editing.scheduledAt)),
               contactIds: editing.contactIds,
             }
           : { content: "", scheduledAt: "", contactIds: [] },

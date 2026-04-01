@@ -12,6 +12,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import HubIcon from "@mui/icons-material/Hub";
 import type { ConnectionType } from "../../modules";
+import { toDate } from "../../utils";
 
 type ConnectionCardProps = {
   connection: ConnectionType;
@@ -68,7 +69,7 @@ export function ConnectionCard({
                 {connection.name}
               </Typography>
               <Typography variant="caption" sx={{ color: "#9ca3af" }}>
-                Criada em {connection.createdAt.toLocaleDateString("pt-BR")}
+                Criada em {toDate(connection.createdAt).toLocaleDateString("pt-BR")}
               </Typography>
             </Box>
           </Box>

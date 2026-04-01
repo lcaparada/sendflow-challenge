@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { login } from "../modules/auth/auth.service";
 import { loginSchema, type LoginSchemaType } from "../modules";
+import { getFirebaseErrorMessage } from "../utils";
 import { AuthCard, AuthLayout, AuthTextField, PasswordField } from "../components";
 
 const LoginPage = () => {
@@ -23,8 +24,8 @@ const LoginPage = () => {
     try {
       await login(data.email, data.password);
       navigate("/connections");
-    } catch {
-      setFirebaseError("E-mail ou senha inválidos.");
+    } catch (err) {
+      setFirebaseError(getFirebaseErrorMessage(err));
     }
   };
 

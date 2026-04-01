@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { register as registerUser } from "../modules/auth/auth.service";
 import { registerSchema, type RegisterSchemaType } from "../modules";
 import { AuthCard, AuthLayout, AuthTextField, PasswordField } from "../components";
+import { getFirebaseErrorMessage } from "../utils";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -23,8 +24,8 @@ const RegisterPage = () => {
     try {
       await registerUser(data.email, data.password);
       navigate("/connections");
-    } catch {
-      setFirebaseError("Não foi possível criar a conta. Verifique os dados e tente novamente.");
+    } catch (err) {
+      setFirebaseError(getFirebaseErrorMessage(err));
     }
   };
 

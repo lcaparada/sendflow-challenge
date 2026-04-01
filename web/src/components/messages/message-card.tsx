@@ -13,7 +13,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ScheduleIcon from "@mui/icons-material/Schedule";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { getInitials } from "../../utils";
+import { getInitials, toDate } from "../../utils";
 import type { ContactType, MessageType } from "../../modules";
 
 type MessageCardProps = {
@@ -97,7 +97,7 @@ export function MessageCard({
               )}
               <Typography variant="caption" sx={{ color: "#9ca3af" }}>
                 {isSent ? "Enviada em" : "Agendada para"}{" "}
-                {message.scheduledAt.toLocaleString("pt-BR")}
+                {toDate(message.scheduledAt).toLocaleString("pt-BR")}
               </Typography>
             </Box>
 
