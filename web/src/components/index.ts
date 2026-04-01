@@ -5,4 +5,7 @@ export * from "./loading-indicator";
 export * from "./contacts/contact-card";
 export * from "./connections/connection-card";
 export * from "./contacts/contact-form-dialog";
+export * from "./messages/message-card";
+export * from "./messages/message-form-dialog";
+export * from "./messages/tabs-messages-filter";
 export * from "./connections/connection-form-dialog";

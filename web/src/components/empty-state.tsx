@@ -5,8 +5,8 @@ type EmptyStateProps = {
   icon: React.ReactNode;
   title: string;
   description: string;
-  addLabel: string;
-  onAdd: () => void;
+  addLabel?: string;
+  onAdd?: () => void;
 };
 
 export function EmptyState({
@@ -33,22 +33,24 @@ export function EmptyState({
       <Typography variant="body2" sx={{ color: "#9ca3af", mb: 3 }}>
         {description}
       </Typography>
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={onAdd}
-        sx={{
-          borderRadius: 2,
-          textTransform: "none",
-          fontWeight: 600,
-          background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-          "&:hover": {
-            background: "linear-gradient(135deg, #4f52e0 0%, #7c3aed 100%)",
-          },
-        }}
-      >
-        {addLabel}
-      </Button>
+      {onAdd && addLabel && (
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={onAdd}
+          sx={{
+            borderRadius: 2,
+            textTransform: "none",
+            fontWeight: 600,
+            background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+            "&:hover": {
+              background: "linear-gradient(135deg, #4f52e0 0%, #7c3aed 100%)",
+            },
+          }}
+        >
+          {addLabel}
+        </Button>
+      )}
     </Box>
   );
 }

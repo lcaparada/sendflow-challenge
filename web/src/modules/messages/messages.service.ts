@@ -3,6 +3,8 @@ import {
   collection,
   deleteDoc,
   doc,
+  limit,
+  orderBy,
   query,
   serverTimestamp,
   updateDoc,
@@ -55,21 +57,36 @@ export function deleteMessage(id: string) {
   return deleteDoc(doc(collection(db, DB_COLLECTION), id));
 }
 
-export function getMessages(userId: string, connectionId: string) {
+const PAGE_SIZE = 20;
+
+export function getMessages(
+  userId: string,
+  connectionId: string,
+  pageSize = PAGE_SIZE,
+  status?: MessageStatus,
+) {
+  const constraints = [
+    where("userId", "==", userId),
+    where("connectionId", "==", connectionId),
+    ...(status ? [where("status", "==", status)] : []),
+    orderBy("scheduledAt", "desc"),
+    limit(pageSize),
+  ];
   return collectionData(
-    query(
-      collection(db, DB_COLLECTION),
-      where("userId", "==", userId),
-      where("connectionId", "==", connectionId),
-    ),
+    query(collection(db, DB_COLLECTION), ...constraints),
     { idField: "id" },
   ) as Observable<MessageType[]>;
 }
 
-export function useMessages(userId: string, connectionId: string) {
+export function useMessages(
+  userId: string,
+  connectionId: string,
+  pageSize = PAGE_SIZE,
+  status?: MessageStatus,
+) {
   const observable = useMemo(
-    () => getMessages(userId, connectionId),
-    [userId, connectionId],
+    () => getMessages(userId, connectionId, pageSize, status),
+    [userId, connectionId, pageSize, status],
   );
   return useObservable<MessageType>(observable);
 }
