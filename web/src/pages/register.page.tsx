@@ -21,7 +21,7 @@ import {
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { register as registerUser } from "../functions/auth";
+import { register as registerUser } from "../modules/auth/auth.service";
 import { registerSchema, type RegisterSchemaType } from "../modules";
 
 const textFieldSx = {

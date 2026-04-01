@@ -20,7 +20,7 @@ import {
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { login } from "../functions/auth";
+import { login } from "../modules/auth/auth.service";
 import { loginSchema, type LoginSchemaType } from "../modules";
 
 const textFieldSx = {

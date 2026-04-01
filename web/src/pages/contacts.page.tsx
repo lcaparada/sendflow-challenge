@@ -28,7 +28,6 @@ import { useParams } from "react-router-dom";
 import { IMaskInput } from "react-imask";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "../hooks/use-auth";
 
 import {
   createContact,
@@ -41,6 +40,7 @@ import {
   type ContactSchemaType,
   type ContactType,
 } from "../modules";
+import { useAuth } from "../hooks";
 
 const textFieldSx = {
   "& .MuiOutlinedInput-root": {

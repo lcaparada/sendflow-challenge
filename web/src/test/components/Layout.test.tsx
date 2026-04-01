@@ -14,7 +14,7 @@ vi.mock("../../functions/auth", () => ({
   logout: vi.fn().mockResolvedValue(undefined),
 }));
 
-import { logout } from "../../functions/auth";
+import { logout } from "../../modules/auth/auth.service";
 
 const renderAtPath = (path: string) =>
   render(

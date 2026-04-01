@@ -5,15 +5,15 @@ export * from "./auth/register.schemas";
 
 // CONNECTIONS
 
-export * from "./connections/connection.schemas";
-export * from "./connections/connection.types";
+export * from "./connections/connections.schemas";
+export * from "./connections/connections.types";
 
 // CONTACTS
 
-export * from "./contacts/contact.schemas";
-export * from "./contacts/contact.types";
+export * from "./contacts/contacts.schemas";
+export * from "./contacts/contacts.types";
 
 // MESSAGES
 
-export * from "./messages/message.schemas";
-export * from "./messages/message.types";
+export * from "./messages/messages.schemas";
+export * from "./messages/messages.types";

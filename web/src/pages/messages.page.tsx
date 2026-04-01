@@ -31,7 +31,6 @@ import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import { useParams } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "../hooks/use-auth";
 
 import {
   createMessage,
@@ -46,6 +45,7 @@ import {
   type MessageSchemaType,
   type MessageType,
 } from "../modules";
+import { useAuth } from "../hooks";
 
 type FilterTab = "all" | "scheduled" | "sent";
 
@@ -455,7 +455,6 @@ const MessagesPage = () => {
                       </Box>
                     </Box>
 
-                    {/* Actions */}
                     <Box className="flex gap-0.5 shrink-0">
                       {!isSent && (
                         <Tooltip title="Editar">

@@ -14,7 +14,7 @@ vi.mock("../../functions/auth", () => ({
   login: vi.fn(),
 }));
 
-import { login } from "../../functions/auth";
+import { login } from "../../modules/auth/auth.service";
 
 const renderPage = () =>
   render(

@@ -24,7 +24,6 @@ import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAuth } from "../hooks/use-auth";
 import {
   createConnection,
   deleteConnection,
@@ -36,6 +35,7 @@ import {
   type ConnectionSchemaType,
   type ConnectionType,
 } from "../modules";
+import { useAuth } from "../hooks";
 
 const ConnectionsPage = () => {
   const { user } = useAuth();
