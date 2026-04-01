@@ -5,8 +5,8 @@ import RegisterPage from "./pages/register.page";
 import ConnectionsPage from "./pages/connections.page";
 import ContactsPage from "./pages/contacts.page";
 import MessagesPage from "./pages/messages.page";
-import Layout from "./components/Layout";
-import ProtectedRoute from "./components/ProtectedRoute";
+import Layout from "./components/layout";
+import ProtectedRoute from "./components/protected-route";
 import { useAuth } from "./hooks/use-auth";
 
 const AppRoutes = () => {
