@@ -10,7 +10,7 @@ vi.mock("react-router-dom", async (importOriginal) => ({
   useNavigate: () => mockNavigate,
 }));
 
-vi.mock("../../functions/auth", () => ({
+vi.mock("../../modules/auth/auth.service", () => ({
   logout: vi.fn().mockResolvedValue(undefined),
 }));
 
@@ -22,27 +22,15 @@ const renderAtPath = (path: string) =>
       <Routes>
         <Route
           path="/connections"
-          element={
-            <Layout>
-              <div>Page Content</div>
-            </Layout>
-          }
+          element={<Layout><div>Page Content</div></Layout>}
         />
         <Route
           path="/connections/:connectionId/contacts"
-          element={
-            <Layout>
-              <div>Page Content</div>
-            </Layout>
-          }
+          element={<Layout><div>Page Content</div></Layout>}
         />
         <Route
           path="/connections/:connectionId/messages"
-          element={
-            <Layout>
-              <div>Page Content</div>
-            </Layout>
-          }
+          element={<Layout><div>Page Content</div></Layout>}
         />
         <Route path="/login" element={<div>Login</div>} />
       </Routes>

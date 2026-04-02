@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import ProtectedRoute from "../../components/protected-route";
 
-vi.mock("../../web/hooks/useAuth", () => ({
+vi.mock("../../hooks/use-auth", () => ({
   useAuth: vi.fn(),
 }));
 

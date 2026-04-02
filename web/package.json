@@ -8,9 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest --ignore src/test/firestore",
-    "test:ui": "vitest --ui --ignore src/test/firestore",
-    "test:run": "vitest run --ignore src/test/firestore",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
     "test:rules": "vitest run src/test/firestore"
   },
   "dependencies": {
