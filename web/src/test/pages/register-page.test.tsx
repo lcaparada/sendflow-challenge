@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { FirebaseError } from "firebase/app";
 import RegisterPage from "../../pages/register.page";
 
 const mockNavigate = vi.fn();
@@ -10,7 +11,7 @@ vi.mock("react-router-dom", async (importOriginal) => ({
   useNavigate: () => mockNavigate,
 }));
 
-vi.mock("../../functions/auth", () => ({
+vi.mock("../../modules/auth/auth.service", () => ({
   register: vi.fn(),
 }));
 
@@ -47,6 +48,11 @@ describe("RegisterPage", () => {
     expect(screen.getByLabelText(/confirmar senha/i)).toBeInTheDocument();
   });
 
+  it("renders the submit button", () => {
+    renderPage();
+    expect(screen.getByRole("button", { name: /cadastrar/i })).toBeInTheDocument();
+  });
+
   it("shows error when passwords do not match", async () => {
     renderPage();
     fillForm("user@test.com", "123456", "654321");
@@ -64,7 +70,7 @@ describe("RegisterPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /cadastrar/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/mínimo 6 caracteres/i)).toBeInTheDocument();
+      expect(screen.getByText(/pelo menos 6 caracteres/i)).toBeInTheDocument();
     });
     expect(register).not.toHaveBeenCalled();
   });
@@ -80,18 +86,28 @@ describe("RegisterPage", () => {
     });
   });
 
-  it("shows error when Firebase registration fails", async () => {
+  it("shows error when email is already in use", async () => {
     vi.mocked(register).mockRejectedValueOnce(
-      new Error("email already in use"),
+      new FirebaseError("auth/email-already-in-use", "email already in use"),
     );
     renderPage();
     fillForm("existing@test.com", "123456", "123456");
     fireEvent.click(screen.getByRole("button", { name: /cadastrar/i }));
 
     await waitFor(() => {
-      expect(
-        screen.getByText(/não foi possível criar a conta/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/este e-mail já está em uso/i)).toBeInTheDocument();
+    });
+    expect(mockNavigate).not.toHaveBeenCalled();
+  });
+
+  it("shows generic error for unexpected failures", async () => {
+    vi.mocked(register).mockRejectedValueOnce(new Error("network error"));
+    renderPage();
+    fillForm("user@test.com", "123456", "123456");
+    fireEvent.click(screen.getByRole("button", { name: /cadastrar/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/network error/i)).toBeInTheDocument();
     });
     expect(mockNavigate).not.toHaveBeenCalled();
   });

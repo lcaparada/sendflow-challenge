@@ -80,6 +80,7 @@ export function ConnectionCard({
           >
             <Tooltip title="Editar">
               <IconButton
+                aria-label="Editar"
                 size="small"
                 onClick={() => onEdit(connection)}
                 sx={{
@@ -92,6 +93,7 @@ export function ConnectionCard({
             </Tooltip>
             <Tooltip title="Excluir">
               <IconButton
+                aria-label="Excluir"
                 size="small"
                 onClick={() => onDelete(connection.id)}
                 sx={{

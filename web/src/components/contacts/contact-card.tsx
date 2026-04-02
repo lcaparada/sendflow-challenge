@@ -81,6 +81,7 @@ export function ContactCard({
           <Box className="flex gap-0.5 shrink-0 ml-2">
             <Tooltip title="Editar">
               <IconButton
+                aria-label="Editar"
                 size="small"
                 onClick={() => onEdit(contact)}
                 sx={{
@@ -93,6 +94,7 @@ export function ContactCard({
             </Tooltip>
             <Tooltip title="Excluir">
               <IconButton
+                aria-label="Excluir"
                 size="small"
                 onClick={() => onDelete(contact.id)}
                 sx={{

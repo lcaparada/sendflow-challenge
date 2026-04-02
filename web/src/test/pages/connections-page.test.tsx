@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import ConnectionsPage from "../../pages/connections.page";
-import type { Connection } from "../../types";
+import type { ConnectionType } from "../../modules";
 
 const mockNavigate = vi.fn();
 
@@ -11,25 +11,30 @@ vi.mock("react-router-dom", async (importOriginal) => ({
   useNavigate: () => mockNavigate,
 }));
 
-vi.mock("../../web/hooks/useAuth", () => ({
+vi.mock("../../hooks", () => ({
   useAuth: () => ({ user: { uid: "user-1" } }),
+  useObservable: vi.fn(),
 }));
 
-vi.mock("../../functions", () => ({
-  subscribeToConnections: vi.fn(),
-  createConnection: vi.fn().mockResolvedValue(undefined),
-  updateConnection: vi.fn().mockResolvedValue(undefined),
-  deleteConnection: vi.fn().mockResolvedValue(undefined),
+vi.mock("../../lib/firebase", () => ({
+  auth: { currentUser: { uid: "user-1" } },
+  db: {},
 }));
 
-import {
-  subscribeToConnections,
-  createConnection,
-  updateConnection,
-  deleteConnection,
-} from "../../functions";
+vi.mock("../../modules", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../modules")>();
+  return {
+    ...actual,
+    useConnections: vi.fn(),
+    createConnection: vi.fn().mockResolvedValue(undefined),
+    updateConnection: vi.fn().mockResolvedValue(undefined),
+    deleteConnection: vi.fn().mockResolvedValue(undefined),
+  };
+});
 
-const makeConnection = (overrides: Partial<Connection> = {}): Connection => ({
+import { useConnections, createConnection, updateConnection, deleteConnection } from "../../modules";
+
+const makeConnection = (overrides: Partial<ConnectionType> = {}): ConnectionType => ({
   id: "conn-1",
   userId: "user-1",
   name: "My Connection",
@@ -37,11 +42,8 @@ const makeConnection = (overrides: Partial<Connection> = {}): Connection => ({
   ...overrides,
 });
 
-const renderWithConnections = (connections: Connection[] = []) => {
-  vi.mocked(subscribeToConnections).mockImplementation((_uid, callback) => {
-    callback(connections);
-    return vi.fn();
-  });
+const renderWithConnections = (connections: ConnectionType[] = [], loading = false) => {
+  vi.mocked(useConnections).mockReturnValue([connections, loading, null]);
   return render(
     <MemoryRouter>
       <ConnectionsPage />
@@ -52,6 +54,11 @@ const renderWithConnections = (connections: Connection[] = []) => {
 describe("ConnectionsPage", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("shows loading indicator while fetching", () => {
+    renderWithConnections([], true);
+    expect(screen.getByRole("progressbar")).toBeInTheDocument();
   });
 
   it("shows empty state when there are no connections", () => {
@@ -68,11 +75,9 @@ describe("ConnectionsPage", () => {
     expect(screen.getByText("Connection B")).toBeInTheDocument();
   });
 
-  it("opens create dialog when clicking the button", async () => {
+  it("opens create dialog when clicking the header button", async () => {
     renderWithConnections([]);
-    fireEvent.click(
-      screen.getAllByRole("button", { name: /nova conexão/i })[0],
-    );
+    fireEvent.click(screen.getAllByRole("button", { name: /nova conexão/i })[0]);
     await waitFor(() => {
       expect(screen.getByRole("dialog")).toBeInTheDocument();
     });
@@ -80,9 +85,7 @@ describe("ConnectionsPage", () => {
 
   it("calls createConnection on save", async () => {
     renderWithConnections([]);
-    fireEvent.click(
-      screen.getAllByRole("button", { name: /nova conexão/i })[0],
-    );
+    fireEvent.click(screen.getAllByRole("button", { name: /nova conexão/i })[0]);
 
     await waitFor(() => screen.getByLabelText(/nome da conexão/i));
     fireEvent.change(screen.getByLabelText(/nome da conexão/i), {
@@ -91,14 +94,13 @@ describe("ConnectionsPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /salvar/i }));
 
     await waitFor(() => {
-      expect(createConnection).toHaveBeenCalledWith("user-1", "New Connection");
+      expect(createConnection).toHaveBeenCalledWith("New Connection");
     });
   });
 
   it("opens edit dialog pre-filled with connection name", async () => {
     renderWithConnections([makeConnection({ name: "Edit Me" })]);
-
-    fireEvent.click(screen.getByRole("button", { name: "Editar" }));
+    fireEvent.click(screen.getByRole("button", { name: /editar/i }));
 
     await waitFor(() => {
       expect(screen.getByDisplayValue("Edit Me")).toBeInTheDocument();
@@ -108,7 +110,7 @@ describe("ConnectionsPage", () => {
   it("calls updateConnection on save when editing", async () => {
     renderWithConnections([makeConnection({ id: "conn-1", name: "Old Name" })]);
 
-    fireEvent.click(screen.getByRole("button", { name: "Editar" }));
+    fireEvent.click(screen.getByRole("button", { name: /editar/i }));
     await waitFor(() => screen.getByDisplayValue("Old Name"));
 
     fireEvent.change(screen.getByDisplayValue("Old Name"), {
@@ -121,22 +123,37 @@ describe("ConnectionsPage", () => {
     });
   });
 
-  it("calls deleteConnection after confirm", async () => {
-    vi.spyOn(window, "confirm").mockReturnValue(true);
+  it("opens confirm dialog when clicking delete", async () => {
     renderWithConnections([makeConnection({ id: "conn-1" })]);
+    fireEvent.click(screen.getByRole("button", { name: /excluir/i }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Excluir" }));
+    await waitFor(() => {
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+      expect(screen.getByText(/excluir conexão/i)).toBeInTheDocument();
+    });
+  });
+
+  it("calls deleteConnection after confirm", async () => {
+    renderWithConnections([makeConnection({ id: "conn-1" })]);
+    fireEvent.click(screen.getByRole("button", { name: /excluir/i }));
+
+    await waitFor(() => screen.getByRole("dialog"));
+    const dialog = screen.getByRole("dialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: /excluir/i }));
 
     await waitFor(() => {
       expect(deleteConnection).toHaveBeenCalledWith("conn-1");
     });
   });
 
-  it("does not delete when confirm is cancelled", async () => {
-    vi.spyOn(window, "confirm").mockReturnValue(false);
+  it("does not delete when confirm dialog is cancelled", async () => {
     renderWithConnections([makeConnection({ id: "conn-1" })]);
+    fireEvent.click(screen.getByRole("button", { name: /excluir/i }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Excluir" }));
+    await waitFor(() => screen.getByRole("dialog"));
+    const dialog = screen.getByRole("dialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: /cancelar/i }));
+
     expect(deleteConnection).not.toHaveBeenCalled();
   });
 

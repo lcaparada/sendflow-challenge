@@ -142,6 +142,7 @@ export function MessageCard({
             {!isSent && (
               <Tooltip title="Editar">
                 <IconButton
+                  aria-label="Editar"
                   size="small"
                   onClick={() => onEdit(message)}
                   sx={{
@@ -155,6 +156,7 @@ export function MessageCard({
             )}
             <Tooltip title="Excluir">
               <IconButton
+                aria-label="Excluir"
                 size="small"
                 onClick={() => onDelete(message.id)}
                 sx={{
