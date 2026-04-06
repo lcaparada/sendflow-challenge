@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { ConnectionCard } from "../../components/connections/connection-card";
+import { ConnectionCard } from "../../components/connection-card/ConnectionCard";
 import type { ConnectionType } from "../../modules";
 
 const makeConnection = (overrides: Partial<ConnectionType> = {}): ConnectionType => ({

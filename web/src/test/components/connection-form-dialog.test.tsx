@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { ConnectionFormDialog } from "../../components/connections/connection-form-dialog";
+import { ConnectionFormDialog } from "../../components/connection-form-dialog/ConnectionFormDialog";
 import type { ConnectionType } from "../../modules";
 
 vi.mock("../../lib/firebase", () => ({

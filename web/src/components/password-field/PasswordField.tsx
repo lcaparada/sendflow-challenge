@@ -2,7 +2,7 @@ import { useState } from "react";
 import { IconButton, InputAdornment } from "@mui/material";
 import { Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import type { UseFormRegisterReturn } from "react-hook-form";
-import { AuthTextField } from "./auth-text-field";
+import { AuthTextField } from "../auth-text-field/AuthTextField";
 
 interface PasswordFieldProps {
   label: string;

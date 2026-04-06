@@ -1,5 +1,5 @@
 import { Box, CircularProgress } from "@mui/material";
-import { cn } from "../lib";
+import { cn } from "../../lib";
 
 export function LoadingIndicator(props: React.ComponentProps<"div">) {
   const { className, ...boxProps } = props;

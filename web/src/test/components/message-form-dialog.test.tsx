@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
-import { MessageFormDialog } from "../../components/messages/message-form-dialog";
+import { MessageFormDialog } from "../../components/message-form-dialog/MessageFormDialog";
 import type { ContactType, MessageType } from "../../modules";
 
 vi.mock("../../lib/firebase", () => ({

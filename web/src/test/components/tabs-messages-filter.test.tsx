@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { TabsMessagesFilter } from "../../components/messages/tabs-messages-filter";
+import { TabsMessagesFilter } from "../../components/tabs-messages-filter/TabsMessagesFilter";
 
 describe("TabsMessagesFilter", () => {
   it("renders all three tabs", () => {

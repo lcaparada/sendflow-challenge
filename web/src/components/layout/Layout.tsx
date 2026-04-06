@@ -20,7 +20,7 @@ import HubIcon from "@mui/icons-material/Hub";
 import ContactsIcon from "@mui/icons-material/Contacts";
 import SendIcon from "@mui/icons-material/Send";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import { logout } from "../modules/auth/auth.service";
+import { logout } from "../../modules/auth/auth.service";
 import { useState, type ReactNode } from "react";
 
 const DRAWER_WIDTH = 240;
@@ -35,7 +35,7 @@ interface Props {
   children: ReactNode;
 }
 
-const Layout = ({ children }: Props) => {
+export function Layout({ children }: Props) {
   const navigate = useNavigate();
 
   const { connectionId } = useParams();
@@ -251,6 +251,4 @@ const Layout = ({ children }: Props) => {
       </Box>
     </Box>
   );
-};
-
-export default Layout;
+}

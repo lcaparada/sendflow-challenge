@@ -1,8 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { CircularProgress, Box } from "@mui/material";
 
-import Layout from "./components/layout";
-import ProtectedRoute from "./components/protected-route";
+import { Layout, ProtectedRoute } from "./components";
 import { useAuth } from "./hooks/use-auth";
 import LoginPage from "./modules/auth/login.page";
 import RegisterPage from "./modules/auth/register.page";

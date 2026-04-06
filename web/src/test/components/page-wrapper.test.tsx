@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { PageWrapper } from "../../components/page-wrapper";
+import { PageWrapper } from "../../components/page-wrapper/PageWrapper";
 
 describe("PageWrapper", () => {
   it("renders title and description", () => {
@@ -32,7 +32,9 @@ describe("PageWrapper", () => {
         <div />
       </PageWrapper>,
     );
-    expect(screen.getByRole("button", { name: /nova conexão/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /nova conexão/i }),
+    ).toBeInTheDocument();
   });
 
   it("calls button onClick when clicked", () => {
@@ -64,7 +66,12 @@ describe("PageWrapper", () => {
       <PageWrapper
         title="T"
         description="D"
-        search={{ value: "", onChange: vi.fn(), placeholder: "Buscar...", show: true }}
+        search={{
+          value: "",
+          onChange: vi.fn(),
+          placeholder: "Buscar...",
+          show: true,
+        }}
       >
         <div />
       </PageWrapper>,
@@ -77,7 +84,12 @@ describe("PageWrapper", () => {
       <PageWrapper
         title="T"
         description="D"
-        search={{ value: "", onChange: vi.fn(), placeholder: "Buscar...", show: false }}
+        search={{
+          value: "",
+          onChange: vi.fn(),
+          placeholder: "Buscar...",
+          show: false,
+        }}
       >
         <div />
       </PageWrapper>,

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import { ContactCard } from "../../components/contacts/contact-card";
+import { ContactCard } from "../../components/contact-card/ContactCard";
 import type { ContactType } from "../../modules";
 
 const makeContact = (overrides: Partial<ContactType> = {}): ContactType => ({
