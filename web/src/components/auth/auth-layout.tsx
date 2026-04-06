@@ -1,7 +1,7 @@
 import { Box, Typography } from "@mui/material";
 import { Send } from "@mui/icons-material";
 
-type AuthLayoutProps = {
+interface AuthLayoutProps {
   panel: {
     icon: React.ReactNode;
     title: string;
@@ -9,9 +9,11 @@ type AuthLayoutProps = {
     features: string[];
   };
   children: React.ReactNode;
-};
+}
 
-export function AuthLayout({ panel, children }: AuthLayoutProps) {
+export function AuthLayout(props: AuthLayoutProps) {
+  const { children, panel } = props;
+
   return (
     <Box className="flex min-h-screen">
       <Box
@@ -68,12 +70,20 @@ export function AuthLayout({ panel, children }: AuthLayoutProps) {
           >
             {panel.icon}
           </Box>
-          <Typography variant="h3" fontWeight={800} sx={{ color: "white", mb: 2 }}>
+          <Typography
+            variant="h3"
+            fontWeight={800}
+            sx={{ color: "white", mb: 2 }}
+          >
             {panel.title}
           </Typography>
           <Typography
             variant="h6"
-            sx={{ color: "rgba(255,255,255,0.8)", fontWeight: 400, maxWidth: 360 }}
+            sx={{
+              color: "rgba(255,255,255,0.8)",
+              fontWeight: 400,
+              maxWidth: 360,
+            }}
           >
             {panel.subtitle}
           </Typography>
@@ -90,7 +100,9 @@ export function AuthLayout({ panel, children }: AuthLayoutProps) {
                 }}
               >
                 <Box className="w-2 h-2 rounded-full bg-white opacity-80" />
-                <Typography sx={{ color: "rgba(255,255,255,0.9)", fontSize: 14 }}>
+                <Typography
+                  sx={{ color: "rgba(255,255,255,0.9)", fontSize: 14 }}
+                >
                   {item}
                 </Typography>
               </Box>
@@ -103,7 +115,13 @@ export function AuthLayout({ panel, children }: AuthLayoutProps) {
         className="flex flex-col items-center justify-center flex-1 px-8 py-12"
         sx={{ background: "#fafafa" }}
       >
-        <Box sx={{ width: "100%", maxWidth: 420, animation: "fadeUp 0.6s ease-out both" }}>
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: 420,
+            animation: "fadeUp 0.6s ease-out both",
+          }}
+        >
           <Box className="flex lg:hidden items-center gap-2 mb-10 justify-center">
             <Box
               className="flex items-center justify-center w-10 h-10 rounded-xl"

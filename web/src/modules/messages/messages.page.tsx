@@ -27,11 +27,21 @@ import {
 
 export default function MessagesPage() {
   const { user } = useAuth();
+
   const { connectionId } = useParams<{ connectionId: string }>();
 
   const [contacts] = useContacts(user?.uid ?? "", connectionId ?? "");
+
   const [filter, setFilter] = useState<FilterTab>("all");
+  const [formDialog, setFormDialog] = useState<{
+    message: MessageType | null;
+  } | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    id: string;
+    loading: boolean;
+  } | null>(null);
   const [pageSize, setPageSize] = useState(20);
+
   const [messages, loading] = useMessages(
     user?.uid ?? "",
     connectionId ?? "",
@@ -46,19 +56,19 @@ export default function MessagesPage() {
     setPageSize(20);
   }
 
-  const [formDialog, setFormDialog] = useState<{
-    message: MessageType | null;
-  } | null>(null);
-  const [deleteDialog, setDeleteDialog] = useState<{
-    id: string;
-    loading: boolean;
-  } | null>(null);
+  function openCreate() {
+    setFormDialog({ message: null });
+  }
 
-  const openCreate = () => setFormDialog({ message: null });
-  const openEdit = (message: MessageType) => setFormDialog({ message });
-  const closeDialog = () => setFormDialog(null);
+  function openEdit(message: MessageType) {
+    setFormDialog({ message });
+  }
 
-  const onSubmit = async (data: MessageSchemaType) => {
+  function closeDialog() {
+    setFormDialog(null);
+  }
+
+  async function onSubmit(data: MessageSchemaType) {
     if (!user || !connectionId) return;
     const date = new Date(data.scheduledAt);
     if (formDialog?.message) {
@@ -72,9 +82,9 @@ export default function MessagesPage() {
       await createMessage(connectionId, data.contactIds, data.content, date);
     }
     closeDialog();
-  };
+  }
 
-  const handleConfirmDelete = async () => {
+  async function handleConfirmDelete() {
     if (!deleteDialog) return;
     setDeleteDialog({ ...deleteDialog, loading: true });
     try {
@@ -83,7 +93,7 @@ export default function MessagesPage() {
     } catch {
       setDeleteDialog({ ...deleteDialog, loading: false });
     }
-  };
+  }
 
   return (
     <PageWrapper

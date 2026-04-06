@@ -15,10 +15,9 @@ interface TabsMessagesFilterProps {
   onSelectFilter(filter: FilterTab): void;
 }
 
-export function TabsMessagesFilter({
-  filter,
-  onSelectFilter,
-}: TabsMessagesFilterProps) {
+export function TabsMessagesFilter(props: TabsMessagesFilterProps) {
+  const { filter, onSelectFilter } = props;
+
   return (
     <Box sx={{ mb: 4, borderBottom: "1px solid #f0f0f0" }}>
       <Tabs

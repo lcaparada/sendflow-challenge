@@ -4,19 +4,16 @@ import { Lock, Visibility, VisibilityOff } from "@mui/icons-material";
 import type { UseFormRegisterReturn } from "react-hook-form";
 import { AuthTextField } from "./auth-text-field";
 
-type PasswordFieldProps = {
+interface PasswordFieldProps {
   label: string;
   registration: UseFormRegisterReturn;
   error?: string;
   helperText?: string;
-};
+}
 
-export function PasswordField({
-  label,
-  registration,
-  error,
-  helperText,
-}: PasswordFieldProps) {
+export function PasswordField(props: PasswordFieldProps) {
+  const { label, registration, error, helperText } = props;
+
   const [show, setShow] = useState(false);
 
   return (
@@ -37,7 +34,11 @@ export function PasswordField({
           ),
           endAdornment: (
             <InputAdornment position="end">
-              <IconButton onClick={() => setShow((v) => !v)} edge="end" size="small">
+              <IconButton
+                onClick={() => setShow((v) => !v)}
+                edge="end"
+                size="small"
+              >
                 {show ? (
                   <VisibilityOff sx={{ fontSize: 20, color: "#9ca3af" }} />
                 ) : (

@@ -24,16 +24,11 @@ import {
 
 export default function ContactsPage() {
   const { user } = useAuth();
+
   const { connectionId } = useParams<{ connectionId: string }>();
-  const [pageSize, setPageSize] = useState(20);
-  const [contacts, loading] = useContacts(
-    user?.uid ?? "",
-    connectionId ?? "",
-    pageSize,
-  );
-  const hasMore = contacts.length === pageSize;
 
   const [search, setSearch] = useState("");
+  const [pageSize, setPageSize] = useState(20);
   const [searchResults, setSearchResults] = useState<ContactType[]>([]);
   const [searching, setSearching] = useState(false);
   const [formDialog, setFormDialog] = useState<{
@@ -44,13 +39,29 @@ export default function ContactsPage() {
     loading: boolean;
   } | null>(null);
 
+  const [contacts, loading] = useContacts(
+    user?.uid ?? "",
+    connectionId ?? "",
+    pageSize,
+  );
+
+  const hasMore = contacts.length === pageSize;
+
   const displayed = search.trim() ? searchResults : contacts;
 
-  const openCreate = () => setFormDialog({ contact: null });
-  const openEdit = (contact: ContactType) => setFormDialog({ contact });
-  const closeDialog = () => setFormDialog(null);
+  function openCreate() {
+    setFormDialog({ contact: null });
+  }
 
-  const onSubmit = async (data: ContactSchemaType) => {
+  function openEdit(contact: ContactType) {
+    setFormDialog({ contact });
+  }
+
+  function closeDialog() {
+    setFormDialog(null);
+  }
+
+  async function onSubmit(data: ContactSchemaType) {
     if (!user || !connectionId) return;
     const isDuplicate = await checkPhoneDuplicate(
       user.uid,
@@ -65,9 +76,9 @@ export default function ContactsPage() {
       await createContact(connectionId, data.name, data.phone);
     }
     closeDialog();
-  };
+  }
 
-  const handleConfirmDelete = async () => {
+  async function handleConfirmDelete() {
     if (!deleteDialog) return;
     setDeleteDialog({ ...deleteDialog, loading: true });
     try {
@@ -76,7 +87,7 @@ export default function ContactsPage() {
     } catch {
       setDeleteDialog({ ...deleteDialog, loading: false });
     }
-  };
+  }
 
   useEffect(() => {
     if (!search.trim() || !user || !connectionId) return;

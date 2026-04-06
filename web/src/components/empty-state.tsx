@@ -1,21 +1,17 @@
 import { Box, Button, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 
-type EmptyStateProps = {
+interface EmptyStateProps {
   icon: React.ReactNode;
   title: string;
   description: string;
   addLabel?: string;
   onAdd?: () => void;
-};
+}
 
-export function EmptyState({
-  icon,
-  title,
-  description,
-  addLabel,
-  onAdd,
-}: EmptyStateProps) {
+export function EmptyState(props: EmptyStateProps) {
+  const { description, icon, title, addLabel, onAdd } = props;
+
   return (
     <Box
       className="flex flex-col items-center justify-center py-24 rounded-2xl"
@@ -27,7 +23,11 @@ export function EmptyState({
       >
         {icon}
       </Box>
-      <Typography variant="h6" fontWeight={700} sx={{ color: "#374151", mb: 1 }}>
+      <Typography
+        variant="h6"
+        fontWeight={700}
+        sx={{ color: "#374151", mb: 1 }}
+      >
         {title}
       </Typography>
       <Typography variant="body2" sx={{ color: "#9ca3af", mb: 3 }}>

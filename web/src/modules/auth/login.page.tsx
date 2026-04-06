@@ -16,6 +16,7 @@ import {
 
 export default function LoginPage() {
   const navigate = useNavigate();
+
   const [firebaseError, setFirebaseError] = useState("");
 
   const {
@@ -24,7 +25,7 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<LoginSchemaType>({ resolver: zodResolver(loginSchema) });
 
-  const onSubmit = async (data: LoginSchemaType) => {
+  async function onSubmit(data: LoginSchemaType) {
     setFirebaseError("");
     try {
       await login(data.email, data.password);
@@ -32,7 +33,7 @@ export default function LoginPage() {
     } catch (err) {
       setFirebaseError(getFirebaseErrorMessage(err));
     }
-  };
+  }
 
   return (
     <AuthLayout

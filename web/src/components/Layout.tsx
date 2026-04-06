@@ -25,22 +25,27 @@ import { useState, type ReactNode } from "react";
 
 const DRAWER_WIDTH = 240;
 
-type NavItem = {
+interface NavItem {
   label: string;
   icon: ReactNode;
   path: string;
-};
+}
 
-type Props = {
+interface Props {
   children: ReactNode;
-};
+}
 
 const Layout = ({ children }: Props) => {
   const navigate = useNavigate();
+
   const { connectionId } = useParams();
+
   const location = useLocation();
+
   const theme = useTheme();
+
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navItems: NavItem[] = [

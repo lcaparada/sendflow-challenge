@@ -8,30 +8,36 @@ import {
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 
-type AuthCardProps = {
+interface AuthCardProps {
   title: string;
   subtitle: string;
   submitLabel: string;
   isSubmitting: boolean;
   error?: string;
   footer: { text: string; linkLabel: string; to: string };
-  onSubmit: React.FormEventHandler;
+  onSubmit: React.SubmitEventHandler<HTMLFormElement>;
   children: React.ReactNode;
-};
+}
 
-export function AuthCard({
-  title,
-  subtitle,
-  submitLabel,
-  isSubmitting,
-  error,
-  footer,
-  onSubmit,
-  children,
-}: AuthCardProps) {
+export function AuthCard(props: AuthCardProps) {
+  const {
+    footer,
+    isSubmitting,
+    onSubmit,
+    submitLabel,
+    subtitle,
+    title,
+    error,
+    children,
+  } = props;
+
   return (
     <>
-      <Typography variant="h4" fontWeight={800} sx={{ color: "#1a1a2e", mb: 1 }}>
+      <Typography
+        variant="h4"
+        fontWeight={800}
+        sx={{ color: "#1a1a2e", mb: 1 }}
+      >
         {title}
       </Typography>
       <Typography variant="body1" sx={{ color: "#6b7280", mb: 4 }}>
@@ -48,11 +54,7 @@ export function AuthCard({
         </Alert>
       )}
 
-      <Box
-        component="form"
-        onSubmit={onSubmit}
-        className="flex flex-col gap-4"
-      >
+      <Box component="form" onSubmit={onSubmit} className="flex flex-col gap-4">
         {children}
 
         <Button
@@ -87,7 +89,11 @@ export function AuthCard({
         </Button>
       </Box>
 
-      <Typography variant="body2" className="pt-6 text-center" sx={{ color: "#6b7280" }}>
+      <Typography
+        variant="body2"
+        className="pt-6 text-center"
+        sx={{ color: "#6b7280" }}
+      >
         {footer.text}{" "}
         <Link
           component={RouterLink}

@@ -13,19 +13,16 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import type { ContactType } from "../../modules";
 import { getInitials } from "../../utils";
 
-type ContactCardProps = {
+interface ContactCardProps {
   contact: ContactType;
   index: number;
   onEdit: (contact: ContactType) => void;
   onDelete: (id: string) => void;
-};
+}
 
-export function ContactCard({
-  contact,
-  index,
-  onEdit,
-  onDelete,
-}: ContactCardProps) {
+export function ContactCard(props: ContactCardProps) {
+  const { contact, index, onDelete, onEdit } = props;
+
   return (
     <Card
       sx={{

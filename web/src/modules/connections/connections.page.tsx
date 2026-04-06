@@ -23,11 +23,10 @@ import {
 
 export default function ConnectionsPage() {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const [pageSize, setPageSize] = useState(20);
-  const [connections, loading] = useConnections(user?.uid ?? "", pageSize);
-  const hasMore = connections.length === pageSize;
 
+  const navigate = useNavigate();
+
+  const [pageSize, setPageSize] = useState(20);
   const [formDialog, setFormDialog] = useState<{
     connection: ConnectionType | null;
   } | null>(null);
@@ -36,12 +35,23 @@ export default function ConnectionsPage() {
     loading: boolean;
   } | null>(null);
 
-  const openCreate = () => setFormDialog({ connection: null });
-  const openEdit = (connection: ConnectionType) =>
-    setFormDialog({ connection });
-  const closeDialog = () => setFormDialog(null);
+  const [connections, loading] = useConnections(user?.uid ?? "", pageSize);
 
-  const onSubmit = async (data: ConnectionSchemaType) => {
+  const hasMore = connections.length === pageSize;
+
+  function openCreate() {
+    setFormDialog({ connection: null });
+  }
+
+  function openEdit(connection: ConnectionType) {
+    setFormDialog({ connection });
+  }
+
+  function closeDialog() {
+    setFormDialog(null);
+  }
+
+  async function onSubmit(data: ConnectionSchemaType) {
     if (!user) return;
     if (formDialog?.connection) {
       await updateConnection(formDialog.connection.id, data.name);
@@ -49,9 +59,9 @@ export default function ConnectionsPage() {
       await createConnection(data.name);
     }
     closeDialog();
-  };
+  }
 
-  const handleConfirmDelete = async () => {
+  async function handleConfirmDelete() {
     if (!deleteDialog) return;
     setDeleteDialog({ ...deleteDialog, loading: true });
     try {
@@ -60,7 +70,7 @@ export default function ConnectionsPage() {
     } catch {
       setDeleteDialog({ ...deleteDialog, loading: false });
     }
-  };
+  }
 
   return (
     <PageWrapper

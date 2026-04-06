@@ -14,21 +14,17 @@ import HubIcon from "@mui/icons-material/Hub";
 import type { ConnectionType } from "../../modules";
 import { toDate } from "../../utils";
 
-type ConnectionCardProps = {
+interface ConnectionCardProps {
   connection: ConnectionType;
   index: number;
   onClick: () => void;
   onEdit: (connection: ConnectionType) => void;
   onDelete: (id: string) => void;
-};
+}
 
-export function ConnectionCard({
-  connection,
-  index,
-  onClick,
-  onEdit,
-  onDelete,
-}: ConnectionCardProps) {
+export function ConnectionCard(props: ConnectionCardProps) {
+  const { connection, index, onClick, onDelete, onEdit } = props;
+
   return (
     <Card
       sx={{
@@ -69,7 +65,8 @@ export function ConnectionCard({
                 {connection.name}
               </Typography>
               <Typography variant="caption" sx={{ color: "#9ca3af" }}>
-                Criada em {toDate(connection.createdAt).toLocaleDateString("pt-BR")}
+                Criada em{" "}
+                {toDate(connection.createdAt).toLocaleDateString("pt-BR")}
               </Typography>
             </Box>
           </Box>
@@ -126,7 +123,11 @@ export function ConnectionCard({
             className="flex items-center gap-1"
             sx={{ color: "#6366f1", fontSize: 13, fontWeight: 600 }}
           >
-            <Typography variant="caption" fontWeight={600} sx={{ color: "#6366f1" }}>
+            <Typography
+              variant="caption"
+              fontWeight={600}
+              sx={{ color: "#6366f1" }}
+            >
               Acessar
             </Typography>
             <ArrowForwardIcon sx={{ fontSize: 14, color: "#6366f1" }} />

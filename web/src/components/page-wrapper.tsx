@@ -1,7 +1,13 @@
-import { Box, Button, InputAdornment, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  InputAdornment,
+  TextField,
+  Typography,
+} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
-type PageWrapperProps = {
+interface PageWrapperProps {
   title: string;
   description: string;
   button?: {
@@ -16,15 +22,11 @@ type PageWrapperProps = {
     show?: boolean;
   };
   children: React.ReactNode;
-};
+}
 
-export function PageWrapper({
-  title,
-  button,
-  children,
-  description,
-  search,
-}: PageWrapperProps) {
+export function PageWrapper(props: PageWrapperProps) {
+  const { children, description, title, button, search } = props;
+
   return (
     <Box sx={{ animation: "fadeUp 0.4s ease-out both" }}>
       <Box className="flex items-center justify-between flex-wrap gap-3 mb-6">

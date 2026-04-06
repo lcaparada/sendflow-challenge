@@ -3,9 +3,9 @@ import { CircularProgress, Box } from "@mui/material";
 import { useAuth } from "../hooks/use-auth";
 import type { ReactNode } from "react";
 
-type Props = {
+interface Props {
   children: ReactNode;
-};
+}
 
 const ProtectedRoute = ({ children }: Props) => {
   const { user, loading } = useAuth();

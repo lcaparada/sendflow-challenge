@@ -16,21 +16,17 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { getInitials, toDate } from "../../utils";
 import type { ContactType, MessageType } from "../../modules";
 
-type MessageCardProps = {
+interface MessageCardProps {
   message: MessageType;
   index: number;
   contacts: ContactType[];
   onEdit: (message: MessageType) => void;
   onDelete: (id: string) => void;
-};
+}
 
-export function MessageCard({
-  message,
-  index,
-  contacts,
-  onEdit,
-  onDelete,
-}: MessageCardProps) {
+export function MessageCard(props: MessageCardProps) {
+  const { contacts, index, message, onDelete, onEdit } = props;
+
   const isSent = message.status === "sent";
 
   function contactName(id: string) {
