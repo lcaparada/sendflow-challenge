@@ -1,13 +1,14 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { CircularProgress, Box } from "@mui/material";
-import LoginPage from "./pages/login.page";
-import RegisterPage from "./pages/register.page";
-import ConnectionsPage from "./pages/connections.page";
-import ContactsPage from "./pages/contacts.page";
-import MessagesPage from "./pages/messages.page";
+
 import Layout from "./components/layout";
 import ProtectedRoute from "./components/protected-route";
 import { useAuth } from "./hooks/use-auth";
+import LoginPage from "./modules/auth/login.page";
+import RegisterPage from "./modules/auth/register.page";
+import ConnectionsPage from "./modules/connections/connections.page";
+import ContactsPage from "./modules/contacts/contacts.page";
+import MessagesPage from "./modules/messages/messages.page";
 
 const AppRoutes = () => {
   const { loading } = useAuth();

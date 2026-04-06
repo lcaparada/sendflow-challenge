@@ -8,7 +8,7 @@ import {
   act,
 } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import ContactsPage from "../../pages/contacts.page";
+import ContactsPage from "../../modules/contacts/contacts.page";
 import type { ContactType } from "../../modules";
 
 vi.mock("../../hooks", () => ({

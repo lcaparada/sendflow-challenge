@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { FirebaseError } from "firebase/app";
-import RegisterPage from "../../pages/register.page";
+import RegisterPage from "../../modules/auth/register.page";
 
 const mockNavigate = vi.fn();
 
@@ -50,7 +50,9 @@ describe("RegisterPage", () => {
 
   it("renders the submit button", () => {
     renderPage();
-    expect(screen.getByRole("button", { name: /cadastrar/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /cadastrar/i }),
+    ).toBeInTheDocument();
   });
 
   it("shows error when passwords do not match", async () => {
@@ -95,7 +97,9 @@ describe("RegisterPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /cadastrar/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/este e-mail já está em uso/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/este e-mail já está em uso/i),
+      ).toBeInTheDocument();
     });
     expect(mockNavigate).not.toHaveBeenCalled();
   });

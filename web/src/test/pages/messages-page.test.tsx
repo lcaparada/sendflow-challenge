@@ -1,7 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
-import MessagesPage from "../../pages/messages.page";
+import MessagesPage from "../../modules/messages/messages.page";
 import type { ContactType, MessageType } from "../../modules";
 
 vi.mock("../../hooks", () => ({
@@ -26,7 +32,12 @@ vi.mock("../../modules", async (importOriginal) => {
   };
 });
 
-import { useMessages, useContacts, createMessage, deleteMessage } from "../../modules";
+import {
+  useMessages,
+  useContacts,
+  createMessage,
+  deleteMessage,
+} from "../../modules";
 
 const makeContact = (overrides: Partial<ContactType> = {}): ContactType => ({
   id: "contact-1",
@@ -50,13 +61,20 @@ const makeMessage = (overrides: Partial<MessageType> = {}): MessageType => ({
   ...overrides,
 });
 
-const renderWithData = (messages: MessageType[] = [], contacts: ContactType[] = [], loading = false) => {
+const renderWithData = (
+  messages: MessageType[] = [],
+  contacts: ContactType[] = [],
+  loading = false,
+) => {
   vi.mocked(useMessages).mockReturnValue([messages, loading, null]);
   vi.mocked(useContacts).mockReturnValue([contacts, false, null]);
   return render(
     <MemoryRouter initialEntries={["/connections/conn-1/messages"]}>
       <Routes>
-        <Route path="/connections/:connectionId/messages" element={<MessagesPage />} />
+        <Route
+          path="/connections/:connectionId/messages"
+          element={<MessagesPage />}
+        />
       </Routes>
     </MemoryRouter>,
   );
@@ -74,7 +92,9 @@ describe("MessagesPage", () => {
 
   it("shows empty state when there are no messages", () => {
     renderWithData([], []);
-    expect(screen.getByText(/nenhuma mensagem encontrada/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/nenhuma mensagem encontrada/i),
+    ).toBeInTheDocument();
   });
 
   it("renders a list of messages", () => {
@@ -141,7 +161,9 @@ describe("MessagesPage", () => {
 
   it("does not show edit button for sent messages", () => {
     renderWithData([makeMessage({ status: "sent" })]);
-    expect(screen.queryByRole("button", { name: /editar/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /editar/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("shows edit button for scheduled messages", () => {
@@ -151,7 +173,9 @@ describe("MessagesPage", () => {
 
   it("opens create dialog when clicking the button", async () => {
     renderWithData([], []);
-    fireEvent.click(screen.getAllByRole("button", { name: /nova mensagem/i })[0]);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /nova mensagem/i })[0],
+    );
     await waitFor(() => {
       expect(screen.getByRole("dialog")).toBeInTheDocument();
     });
@@ -161,7 +185,9 @@ describe("MessagesPage", () => {
     const contact = makeContact({ id: "contact-1", name: "Alice" });
     renderWithData([], [contact]);
 
-    fireEvent.click(screen.getAllByRole("button", { name: /nova mensagem/i })[0]);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /nova mensagem/i })[0],
+    );
     await waitFor(() => screen.getByRole("textbox", { name: /mensagem/i }));
 
     fireEvent.change(screen.getByRole("textbox", { name: /mensagem/i }), {

@@ -10,8 +10,8 @@ import {
   useConnections,
   type ConnectionSchemaType,
   type ConnectionType,
-} from "../modules";
-import { useAuth } from "../hooks";
+} from "..";
+import { useAuth } from "../../hooks";
 import {
   ConfirmDialog,
   ConnectionCard,
@@ -19,9 +19,9 @@ import {
   EmptyState,
   LoadingIndicator,
   PageWrapper,
-} from "../components";
+} from "../../components";
 
-const ConnectionsPage = () => {
+export default function ConnectionsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [pageSize, setPageSize] = useState(20);
@@ -134,6 +134,4 @@ const ConnectionsPage = () => {
       />
     </PageWrapper>
   );
-};
-
-export default ConnectionsPage;
+}

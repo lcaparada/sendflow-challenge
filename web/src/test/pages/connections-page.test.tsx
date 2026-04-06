@@ -1,7 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import ConnectionsPage from "../../pages/connections.page";
+import ConnectionsPage from "../../modules/connections/connections.page";
 import type { ConnectionType } from "../../modules";
 
 const mockNavigate = vi.fn();
@@ -32,9 +38,16 @@ vi.mock("../../modules", async (importOriginal) => {
   };
 });
 
-import { useConnections, createConnection, updateConnection, deleteConnection } from "../../modules";
+import {
+  useConnections,
+  createConnection,
+  updateConnection,
+  deleteConnection,
+} from "../../modules";
 
-const makeConnection = (overrides: Partial<ConnectionType> = {}): ConnectionType => ({
+const makeConnection = (
+  overrides: Partial<ConnectionType> = {},
+): ConnectionType => ({
   id: "conn-1",
   userId: "user-1",
   name: "My Connection",
@@ -42,7 +55,10 @@ const makeConnection = (overrides: Partial<ConnectionType> = {}): ConnectionType
   ...overrides,
 });
 
-const renderWithConnections = (connections: ConnectionType[] = [], loading = false) => {
+const renderWithConnections = (
+  connections: ConnectionType[] = [],
+  loading = false,
+) => {
   vi.mocked(useConnections).mockReturnValue([connections, loading, null]);
   return render(
     <MemoryRouter>
@@ -77,7 +93,9 @@ describe("ConnectionsPage", () => {
 
   it("opens create dialog when clicking the header button", async () => {
     renderWithConnections([]);
-    fireEvent.click(screen.getAllByRole("button", { name: /nova conexão/i })[0]);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /nova conexão/i })[0],
+    );
     await waitFor(() => {
       expect(screen.getByRole("dialog")).toBeInTheDocument();
     });
@@ -85,7 +103,9 @@ describe("ConnectionsPage", () => {
 
   it("calls createConnection on save", async () => {
     renderWithConnections([]);
-    fireEvent.click(screen.getAllByRole("button", { name: /nova conexão/i })[0]);
+    fireEvent.click(
+      screen.getAllByRole("button", { name: /nova conexão/i })[0],
+    );
 
     await waitFor(() => screen.getByLabelText(/nome da conexão/i));
     fireEvent.change(screen.getByLabelText(/nome da conexão/i), {

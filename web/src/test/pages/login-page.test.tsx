@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import { FirebaseError } from "firebase/app";
-import LoginPage from "../../pages/login.page";
+import LoginPage from "../../modules/auth/login.page";
 
 const mockNavigate = vi.fn();
 
@@ -72,7 +72,9 @@ describe("LoginPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /entrar/i }));
 
     await waitFor(() => {
-      expect(screen.getByText(/e-mail ou senha inválidos/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/e-mail ou senha inválidos/i),
+      ).toBeInTheDocument();
     });
   });
 

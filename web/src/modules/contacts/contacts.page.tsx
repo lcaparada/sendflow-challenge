@@ -12,21 +12,25 @@ import {
   useContacts,
   type ContactSchemaType,
   type ContactType,
-} from "../modules";
-import { useAuth } from "../hooks";
+} from "..";
+import { useAuth } from "../../hooks";
 import {
   ConfirmDialog,
   ContactCard,
   ContactFormDialog,
   EmptyState,
   PageWrapper,
-} from "../components";
+} from "../../components";
 
-const ContactsPage = () => {
+export default function ContactsPage() {
   const { user } = useAuth();
   const { connectionId } = useParams<{ connectionId: string }>();
   const [pageSize, setPageSize] = useState(20);
-  const [contacts, loading] = useContacts(user?.uid ?? "", connectionId ?? "", pageSize);
+  const [contacts, loading] = useContacts(
+    user?.uid ?? "",
+    connectionId ?? "",
+    pageSize,
+  );
   const hasMore = contacts.length === pageSize;
 
   const [search, setSearch] = useState("");
@@ -172,6 +176,4 @@ const ContactsPage = () => {
       />
     </PageWrapper>
   );
-};
-
-export default ContactsPage;
+}

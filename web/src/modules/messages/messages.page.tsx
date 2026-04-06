@@ -12,8 +12,8 @@ import {
   useMessages,
   type MessageSchemaType,
   type MessageType,
-} from "../modules";
-import { useAuth } from "../hooks";
+} from "..";
+import { useAuth } from "../../hooks";
 import {
   ConfirmDialog,
   EmptyState,
@@ -23,7 +23,7 @@ import {
   PageWrapper,
   TabsMessagesFilter,
   type FilterTab,
-} from "../components";
+} from "../../components";
 
 export default function MessagesPage() {
   const { user } = useAuth();
@@ -46,8 +46,13 @@ export default function MessagesPage() {
     setPageSize(20);
   }
 
-  const [formDialog, setFormDialog] = useState<{ message: MessageType | null } | null>(null);
-  const [deleteDialog, setDeleteDialog] = useState<{ id: string; loading: boolean } | null>(null);
+  const [formDialog, setFormDialog] = useState<{
+    message: MessageType | null;
+  } | null>(null);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    id: string;
+    loading: boolean;
+  } | null>(null);
 
   const openCreate = () => setFormDialog({ message: null });
   const openEdit = (message: MessageType) => setFormDialog({ message });
@@ -57,7 +62,12 @@ export default function MessagesPage() {
     if (!user || !connectionId) return;
     const date = new Date(data.scheduledAt);
     if (formDialog?.message) {
-      await updateMessage(formDialog.message.id, data.contactIds, data.content, date);
+      await updateMessage(
+        formDialog.message.id,
+        data.contactIds,
+        data.content,
+        date,
+      );
     } else {
       await createMessage(connectionId, data.contactIds, data.content, date);
     }
@@ -79,7 +89,11 @@ export default function MessagesPage() {
     <PageWrapper
       title="Mensagens"
       description={`${messages.length} mensagem${messages.length !== 1 ? "s" : ""} cadastrada${messages.length !== 1 ? "s" : ""}`}
-      button={{ icon: <AddIcon />, label: "Nova mensagem", onClick: openCreate }}
+      button={{
+        icon: <AddIcon />,
+        label: "Nova mensagem",
+        onClick: openCreate,
+      }}
     >
       <TabsMessagesFilter filter={filter} onSelectFilter={handleFilterChange} />
 

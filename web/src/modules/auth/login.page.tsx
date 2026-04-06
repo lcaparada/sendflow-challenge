@@ -4,12 +4,17 @@ import { Email, Send } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { login } from "../modules/auth/auth.service";
-import { loginSchema, type LoginSchemaType } from "../modules";
-import { getFirebaseErrorMessage } from "../utils";
-import { AuthCard, AuthLayout, AuthTextField, PasswordField } from "../components";
+import { login } from "./auth.service";
+import { loginSchema, type LoginSchemaType } from "..";
+import { getFirebaseErrorMessage } from "../../utils";
+import {
+  AuthCard,
+  AuthLayout,
+  AuthTextField,
+  PasswordField,
+} from "../../components";
 
-const LoginPage = () => {
+export default function LoginPage() {
   const navigate = useNavigate();
   const [firebaseError, setFirebaseError] = useState("");
 
@@ -35,7 +40,11 @@ const LoginPage = () => {
         icon: <Send sx={{ fontSize: 40, color: "white" }} />,
         title: "SendFlow",
         subtitle: "Gerencie suas conexões e envie mensagens com facilidade",
-        features: ["Conexões centralizadas", "Contatos organizados", "Disparos agendados"],
+        features: [
+          "Conexões centralizadas",
+          "Contatos organizados",
+          "Disparos agendados",
+        ],
       }}
     >
       <AuthCard
@@ -44,7 +53,11 @@ const LoginPage = () => {
         submitLabel="Entrar"
         isSubmitting={isSubmitting}
         error={firebaseError}
-        footer={{ text: "Não tem uma conta?", linkLabel: "Cadastre-se grátis", to: "/register" }}
+        footer={{
+          text: "Não tem uma conta?",
+          linkLabel: "Cadastre-se grátis",
+          to: "/register",
+        }}
         onSubmit={handleSubmit(onSubmit)}
       >
         <AuthTextField
@@ -74,6 +87,4 @@ const LoginPage = () => {
       </AuthCard>
     </AuthLayout>
   );
-};
-
-export default LoginPage;
+}
