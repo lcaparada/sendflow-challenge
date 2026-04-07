@@ -1,3 +1,6 @@
+export * from "./dialog/DialogApp";
+export * from "./dialog/DialogContext";
+export * from "./dialog/DialogFacade";
 export * from "./auth-card/AuthCard";
 export * from "./auth-layout/AuthLayout";
 export * from "./auth-text-field/AuthTextField";

@@ -1,41 +1,43 @@
+import { useState } from "react";
 import {
   Button,
   CircularProgress,
-  Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Typography,
 } from "@mui/material";
 import WarningAmberRoundedIcon from "@mui/icons-material/WarningAmberRounded";
+import { useCloseDialog } from "../dialog/DialogContext";
 
 type ConfirmDialogProps = {
-  open: boolean;
-  loading: boolean;
   title: string;
   description: string;
   confirmLabel?: string;
-  onClose: () => void;
   onConfirm: () => Promise<void>;
 };
 
 export function ConfirmDialog({
-  open,
-  loading,
   title,
   description,
   confirmLabel = "Excluir",
-  onClose,
   onConfirm,
 }: ConfirmDialogProps) {
+  const close = useCloseDialog();
+  const [loading, setLoading] = useState(false);
+
+  async function handleConfirm() {
+    setLoading(true);
+    try {
+      await onConfirm();
+      close();
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="xs"
-      fullWidth
-      slotProps={{ paper: { sx: { borderRadius: 3 } } }}
-    >
+    <>
       <DialogTitle
         sx={{
           fontWeight: 700,
@@ -53,13 +55,13 @@ export function ConfirmDialog({
       </DialogContent>
       <DialogActions sx={{ px: 3, pb: 3, gap: 1 }}>
         <Button
-          onClick={onClose}
+          onClick={() => close()}
           sx={{ borderRadius: 2, textTransform: "none", color: "#6b7280" }}
         >
           Cancelar
         </Button>
         <Button
-          onClick={onConfirm}
+          onClick={handleConfirm}
           variant="contained"
           disabled={loading}
           sx={{
@@ -77,6 +79,6 @@ export function ConfirmDialog({
           )}
         </Button>
       </DialogActions>
-    </Dialog>
+    </>
   );
 }

@@ -4,13 +4,9 @@ import AddIcon from "@mui/icons-material/Add";
 import ContactsIcon from "@mui/icons-material/Contacts";
 import { useParams } from "react-router-dom";
 import {
-  checkPhoneDuplicate,
-  createContact,
   deleteContact,
   searchContacts,
-  updateContact,
   useContacts,
-  type ContactSchemaType,
   type ContactType,
 } from "..";
 import { useAuth } from "../../hooks";
@@ -20,84 +16,73 @@ import {
   ContactFormDialog,
   EmptyState,
   PageWrapper,
+  openDialog,
 } from "../../components";
 
 export default function ContactsPage() {
   const { user } = useAuth();
-
   const { connectionId } = useParams<{ connectionId: string }>();
 
   const [search, setSearch] = useState("");
   const [pageSize, setPageSize] = useState(20);
   const [searchResults, setSearchResults] = useState<ContactType[]>([]);
   const [searching, setSearching] = useState(false);
-  const [formDialog, setFormDialog] = useState<{
-    contact: ContactType | null;
-  } | null>(null);
-  const [deleteDialog, setDeleteDialog] = useState<{
-    id: string;
-    loading: boolean;
-  } | null>(null);
 
-  const [contacts, loading] = useContacts(
-    user?.uid ?? "",
-    connectionId ?? "",
-    pageSize,
-  );
+  const [contacts, loading] = useContacts(user?.uid ?? "", connectionId ?? "", pageSize);
 
   const hasMore = contacts.length === pageSize;
-
   const displayed = search.trim() ? searchResults : contacts;
 
-  function openCreate() {
-    setFormDialog({ contact: null });
+  function handleCreate() {
+    openDialog({
+      maxWidth: "xs",
+      fullWidth: true,
+      slotProps: { paper: { sx: { borderRadius: 3 } } },
+      children: (
+        <ContactFormDialog
+          editing={null}
+          userId={user!.uid}
+          connectionId={connectionId!}
+        />
+      ),
+    });
   }
 
-  function openEdit(contact: ContactType) {
-    setFormDialog({ contact });
+  function handleEdit(contact: ContactType) {
+    openDialog({
+      maxWidth: "xs",
+      fullWidth: true,
+      slotProps: { paper: { sx: { borderRadius: 3 } } },
+      children: (
+        <ContactFormDialog
+          editing={contact}
+          userId={user!.uid}
+          connectionId={connectionId!}
+        />
+      ),
+    });
   }
 
-  function closeDialog() {
-    setFormDialog(null);
-  }
-
-  async function onSubmit(data: ContactSchemaType) {
-    if (!user || !connectionId) return;
-    const isDuplicate = await checkPhoneDuplicate(
-      user.uid,
-      data.phone,
-      formDialog?.contact?.id,
-    );
-    if (isDuplicate)
-      throw new Error("Este número já está cadastrado para outro contato.");
-    if (formDialog?.contact) {
-      await updateContact(formDialog.contact.id, data.name, data.phone);
-    } else {
-      await createContact(connectionId, data.name, data.phone);
-    }
-    closeDialog();
-  }
-
-  async function handleConfirmDelete() {
-    if (!deleteDialog) return;
-    setDeleteDialog({ ...deleteDialog, loading: true });
-    try {
-      await deleteContact(deleteDialog.id);
-      setDeleteDialog(null);
-    } catch {
-      setDeleteDialog({ ...deleteDialog, loading: false });
-    }
+  function handleDelete(id: string) {
+    openDialog({
+      maxWidth: "xs",
+      fullWidth: true,
+      slotProps: { paper: { sx: { borderRadius: 3 } } },
+      children: (
+        <ConfirmDialog
+          title="Excluir contato"
+          description="Tem certeza que deseja excluir este contato? Esta ação não pode ser desfeita."
+          onConfirm={() => deleteContact(id)}
+        />
+      ),
+    });
   }
 
   useEffect(() => {
     if (!search.trim() || !user || !connectionId) return;
     const timeout = setTimeout(async () => {
       setSearching(true);
-      const results = await searchContacts(
-        user.uid,
-        connectionId,
-        search.trim(),
-      );
+      const results = await searchContacts(user.uid, connectionId, search.trim());
       setSearchResults(results);
       setSearching(false);
     }, 300);
@@ -108,7 +93,7 @@ export default function ContactsPage() {
     <PageWrapper
       title="Contatos"
       description={`${contacts.length} contato${contacts.length !== 1 ? "s" : ""} cadastrado${contacts.length !== 1 ? "s" : ""}`}
-      button={{ icon: <AddIcon />, label: "Novo contato", onClick: openCreate }}
+      button={{ icon: <AddIcon />, label: "Novo contato", onClick: handleCreate }}
       search={{
         value: search,
         onChange: setSearch,
@@ -126,7 +111,7 @@ export default function ContactsPage() {
           title="Nenhum contato ainda"
           description="Crie seu primeiro contato para começar"
           addLabel="Novo contato"
-          onAdd={openCreate}
+          onAdd={handleCreate}
         />
       ) : displayed.length === 0 ? (
         <Typography sx={{ color: "#9ca3af", mt: 4 }}>
@@ -136,8 +121,7 @@ export default function ContactsPage() {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
+            gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
             gap: 2,
           }}
         >
@@ -146,8 +130,8 @@ export default function ContactsPage() {
               key={contact.id}
               contact={contact}
               index={i}
-              onEdit={openEdit}
-              onDelete={(id) => setDeleteDialog({ id, loading: false })}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
             />
           ))}
           {hasMore && !search.trim() && (
@@ -169,22 +153,6 @@ export default function ContactsPage() {
           )}
         </Box>
       )}
-
-      <ContactFormDialog
-        open={formDialog !== null}
-        editing={formDialog?.contact ?? null}
-        onClose={closeDialog}
-        onSubmit={onSubmit}
-      />
-
-      <ConfirmDialog
-        open={deleteDialog !== null}
-        loading={deleteDialog?.loading ?? false}
-        title="Excluir contato"
-        description="Tem certeza que deseja excluir este contato? Esta ação não pode ser desfeita."
-        onClose={() => setDeleteDialog(null)}
-        onConfirm={handleConfirmDelete}
-      />
     </PageWrapper>
   );
 }

@@ -1,2 +1,2 @@
-export * from "./use-auth";
-export * from "./use-observable";
+export * from "./useAuth";
+export * from "./useObservable";

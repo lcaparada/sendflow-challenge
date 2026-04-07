@@ -3,16 +3,7 @@ import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import SendIcon from "@mui/icons-material/Send";
 import { useParams } from "react-router-dom";
-
-import {
-  createMessage,
-  deleteMessage,
-  updateMessage,
-  useContacts,
-  useMessages,
-  type MessageSchemaType,
-  type MessageType,
-} from "..";
+import { deleteMessage, useContacts, useMessages, type MessageType } from "..";
 import { useAuth } from "../../hooks";
 import {
   ConfirmDialog,
@@ -22,24 +13,16 @@ import {
   MessageFormDialog,
   PageWrapper,
   TabsMessagesFilter,
+  openDialog,
   type FilterTab,
 } from "../../components";
 
 export default function MessagesPage() {
   const { user } = useAuth();
-
   const { connectionId } = useParams<{ connectionId: string }>();
 
   const [contacts] = useContacts(user?.uid ?? "", connectionId ?? "");
-
   const [filter, setFilter] = useState<FilterTab>("all");
-  const [formDialog, setFormDialog] = useState<{
-    message: MessageType | null;
-  } | null>(null);
-  const [deleteDialog, setDeleteDialog] = useState<{
-    id: string;
-    loading: boolean;
-  } | null>(null);
   const [pageSize, setPageSize] = useState(20);
 
   const [messages, loading] = useMessages(
@@ -56,43 +39,49 @@ export default function MessagesPage() {
     setPageSize(20);
   }
 
-  function openCreate() {
-    setFormDialog({ message: null });
+  function handleCreate() {
+    openDialog({
+      maxWidth: "sm",
+      fullWidth: true,
+      slotProps: { paper: { sx: { borderRadius: 3 } } },
+      children: (
+        <MessageFormDialog
+          editing={null}
+          contacts={contacts}
+          connectionId={connectionId!}
+        />
+      ),
+    });
   }
 
-  function openEdit(message: MessageType) {
-    setFormDialog({ message });
+  function handleEdit(message: MessageType) {
+    openDialog({
+      maxWidth: "sm",
+      fullWidth: true,
+      slotProps: { paper: { sx: { borderRadius: 3 } } },
+      children: (
+        <MessageFormDialog
+          editing={message}
+          contacts={contacts}
+          connectionId={connectionId!}
+        />
+      ),
+    });
   }
 
-  function closeDialog() {
-    setFormDialog(null);
-  }
-
-  async function onSubmit(data: MessageSchemaType) {
-    if (!user || !connectionId) return;
-    const date = new Date(data.scheduledAt);
-    if (formDialog?.message) {
-      await updateMessage(
-        formDialog.message.id,
-        data.contactIds,
-        data.content,
-        date,
-      );
-    } else {
-      await createMessage(connectionId, data.contactIds, data.content, date);
-    }
-    closeDialog();
-  }
-
-  async function handleConfirmDelete() {
-    if (!deleteDialog) return;
-    setDeleteDialog({ ...deleteDialog, loading: true });
-    try {
-      await deleteMessage(deleteDialog.id);
-      setDeleteDialog(null);
-    } catch {
-      setDeleteDialog({ ...deleteDialog, loading: false });
-    }
+  function handleDelete(id: string) {
+    openDialog({
+      maxWidth: "xs",
+      fullWidth: true,
+      slotProps: { paper: { sx: { borderRadius: 3 } } },
+      children: (
+        <ConfirmDialog
+          title="Excluir mensagem"
+          description="Tem certeza que deseja excluir esta mensagem? Esta ação não pode ser desfeita."
+          onConfirm={() => deleteMessage(id)}
+        />
+      ),
+    });
   }
 
   return (
@@ -102,7 +91,7 @@ export default function MessagesPage() {
       button={{
         icon: <AddIcon />,
         label: "Nova mensagem",
-        onClick: openCreate,
+        onClick: handleCreate,
       }}
     >
       <TabsMessagesFilter filter={filter} onSelectFilter={handleFilterChange} />
@@ -119,7 +108,7 @@ export default function MessagesPage() {
               : `Nenhuma mensagem ${filter === "scheduled" ? "agendada" : "enviada"} ainda`
           }
           addLabel={filter === "all" ? "Nova mensagem" : undefined}
-          onAdd={filter === "all" ? openCreate : undefined}
+          onAdd={filter === "all" ? handleCreate : undefined}
         />
       ) : (
         <Box className="flex flex-col gap-3">
@@ -129,8 +118,8 @@ export default function MessagesPage() {
               message={msg}
               index={i}
               contacts={contacts}
-              onEdit={openEdit}
-              onDelete={(id) => setDeleteDialog({ id, loading: false })}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
             />
           ))}
           {hasMore && (
@@ -151,23 +140,6 @@ export default function MessagesPage() {
           )}
         </Box>
       )}
-
-      <MessageFormDialog
-        open={formDialog !== null}
-        editing={formDialog?.message ?? null}
-        contacts={contacts}
-        onClose={closeDialog}
-        onSubmit={onSubmit}
-      />
-
-      <ConfirmDialog
-        open={deleteDialog !== null}
-        loading={deleteDialog?.loading ?? false}
-        title="Excluir mensagem"
-        description="Tem certeza que deseja excluir esta mensagem? Esta ação não pode ser desfeita."
-        onClose={() => setDeleteDialog(null)}
-        onConfirm={handleConfirmDelete}
-      />
     </PageWrapper>
   );
 }

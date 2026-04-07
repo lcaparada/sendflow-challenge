@@ -1,8 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { CircularProgress, Box } from "@mui/material";
 
-import { Layout, ProtectedRoute } from "./components";
-import { useAuth } from "./hooks/use-auth";
+import { Layout, ProtectedRoute, DialogApp } from "./components";
+import { useAuth } from "./hooks/useAuth";
 import LoginPage from "./modules/auth/login.page";
 import RegisterPage from "./modules/auth/register.page";
 import ConnectionsPage from "./modules/connections/connections.page";
@@ -64,6 +64,7 @@ const AppRoutes = () => {
 const App = () => (
   <BrowserRouter>
     <AppRoutes />
+    <DialogApp />
   </BrowserRouter>
 );
 

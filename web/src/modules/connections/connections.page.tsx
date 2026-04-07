@@ -1,14 +1,11 @@
+import { useState } from "react";
 import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import HubIcon from "@mui/icons-material/Hub";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import {
-  createConnection,
   deleteConnection,
-  updateConnection,
   useConnections,
-  type ConnectionSchemaType,
   type ConnectionType,
 } from "..";
 import { useAuth } from "../../hooks";
@@ -19,64 +16,60 @@ import {
   EmptyState,
   LoadingIndicator,
   PageWrapper,
+  openDialog,
 } from "../../components";
 
 export default function ConnectionsPage() {
   const { user } = useAuth();
-
   const navigate = useNavigate();
-
   const [pageSize, setPageSize] = useState(20);
-  const [formDialog, setFormDialog] = useState<{
-    connection: ConnectionType | null;
-  } | null>(null);
-  const [deleteDialog, setDeleteDialog] = useState<{
-    id: string;
-    loading: boolean;
-  } | null>(null);
 
   const [connections, loading] = useConnections(user?.uid ?? "", pageSize);
 
   const hasMore = connections.length === pageSize;
 
-  function openCreate() {
-    setFormDialog({ connection: null });
+  function handleCreate() {
+    openDialog({
+      maxWidth: "xs",
+      fullWidth: true,
+      slotProps: { paper: { sx: { borderRadius: 3 } } },
+      children: (
+        <ConnectionFormDialog editing={null} />
+      ),
+    });
   }
 
-  function openEdit(connection: ConnectionType) {
-    setFormDialog({ connection });
+  function handleEdit(connection: ConnectionType) {
+    openDialog({
+      maxWidth: "xs",
+      fullWidth: true,
+      slotProps: { paper: { sx: { borderRadius: 3 } } },
+      children: (
+        <ConnectionFormDialog editing={connection} />
+      ),
+    });
   }
 
-  function closeDialog() {
-    setFormDialog(null);
-  }
-
-  async function onSubmit(data: ConnectionSchemaType) {
-    if (!user) return;
-    if (formDialog?.connection) {
-      await updateConnection(formDialog.connection.id, data.name);
-    } else {
-      await createConnection(data.name);
-    }
-    closeDialog();
-  }
-
-  async function handleConfirmDelete() {
-    if (!deleteDialog) return;
-    setDeleteDialog({ ...deleteDialog, loading: true });
-    try {
-      await deleteConnection(deleteDialog.id);
-      setDeleteDialog(null);
-    } catch {
-      setDeleteDialog({ ...deleteDialog, loading: false });
-    }
+  function handleDelete(id: string) {
+    openDialog({
+      maxWidth: "xs",
+      fullWidth: true,
+      slotProps: { paper: { sx: { borderRadius: 3 } } },
+      children: (
+        <ConfirmDialog
+          title="Excluir conexão"
+          description="Tem certeza que deseja excluir esta conexão? Esta ação não pode ser desfeita."
+          onConfirm={() => deleteConnection(id)}
+        />
+      ),
+    });
   }
 
   return (
     <PageWrapper
       title="Conexões"
       description={`${connections.length} conexão${connections.length !== 1 ? "es" : ""} cadastrada${connections.length !== 1 ? "s" : ""}`}
-      button={{ icon: <AddIcon />, label: "Nova conexão", onClick: openCreate }}
+      button={{ icon: <AddIcon />, label: "Nova conexão", onClick: handleCreate }}
     >
       {loading ? (
         <LoadingIndicator />
@@ -86,14 +79,13 @@ export default function ConnectionsPage() {
           title="Nenhuma conexão ainda"
           description="Crie sua primeira conexão para começar"
           addLabel="Nova conexão"
-          onAdd={openCreate}
+          onAdd={handleCreate}
         />
       ) : (
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns:
-              "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
+            gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
             gap: 2,
           }}
         >
@@ -103,8 +95,8 @@ export default function ConnectionsPage() {
               connection={conn}
               index={i}
               onClick={() => navigate(`/connections/${conn.id}/contacts`)}
-              onEdit={openEdit}
-              onDelete={(id) => setDeleteDialog({ id, loading: false })}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
             />
           ))}
           {hasMore && (
@@ -126,22 +118,6 @@ export default function ConnectionsPage() {
           )}
         </Box>
       )}
-
-      <ConnectionFormDialog
-        open={formDialog !== null}
-        editing={formDialog?.connection ?? null}
-        onClose={closeDialog}
-        onSubmit={onSubmit}
-      />
-
-      <ConfirmDialog
-        open={deleteDialog !== null}
-        loading={deleteDialog?.loading ?? false}
-        title="Excluir conexão"
-        description="Tem certeza que deseja excluir esta conexão? Esta ação não pode ser desfeita."
-        onClose={() => setDeleteDialog(null)}
-        onConfirm={handleConfirmDelete}
-      />
     </PageWrapper>
   );
 }
