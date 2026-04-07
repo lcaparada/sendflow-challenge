@@ -21,6 +21,7 @@ import {
 
 export default function ContactsPage() {
   const { user } = useAuth();
+
   const { connectionId } = useParams<{ connectionId: string }>();
 
   const [search, setSearch] = useState("");
@@ -28,12 +29,16 @@ export default function ContactsPage() {
   const [searchResults, setSearchResults] = useState<ContactType[]>([]);
   const [searching, setSearching] = useState(false);
 
-  const [contacts, loading] = useContacts(user?.uid ?? "", connectionId ?? "", pageSize);
+  const [contacts, loading] = useContacts(
+    user?.uid ?? "",
+    connectionId ?? "",
+    pageSize,
+  );
 
   const hasMore = contacts.length === pageSize;
   const displayed = search.trim() ? searchResults : contacts;
 
-  function handleCreate() {
+  function openCreateContactDialog() {
     openDialog({
       maxWidth: "xs",
       fullWidth: true,
@@ -48,7 +53,7 @@ export default function ContactsPage() {
     });
   }
 
-  function handleEdit(contact: ContactType) {
+  function openEditContactDialog(contact: ContactType) {
     openDialog({
       maxWidth: "xs",
       fullWidth: true,
@@ -63,7 +68,7 @@ export default function ContactsPage() {
     });
   }
 
-  function handleDelete(id: string) {
+  function openDeleteContactDialog(id: string) {
     openDialog({
       maxWidth: "xs",
       fullWidth: true,
@@ -82,7 +87,11 @@ export default function ContactsPage() {
     if (!search.trim() || !user || !connectionId) return;
     const timeout = setTimeout(async () => {
       setSearching(true);
-      const results = await searchContacts(user.uid, connectionId, search.trim());
+      const results = await searchContacts(
+        user.uid,
+        connectionId,
+        search.trim(),
+      );
       setSearchResults(results);
       setSearching(false);
     }, 300);
@@ -93,7 +102,11 @@ export default function ContactsPage() {
     <PageWrapper
       title="Contatos"
       description={`${contacts.length} contato${contacts.length !== 1 ? "s" : ""} cadastrado${contacts.length !== 1 ? "s" : ""}`}
-      button={{ icon: <AddIcon />, label: "Novo contato", onClick: handleCreate }}
+      button={{
+        icon: <AddIcon />,
+        label: "Novo contato",
+        onClick: openCreateContactDialog,
+      }}
       search={{
         value: search,
         onChange: setSearch,
@@ -111,7 +124,7 @@ export default function ContactsPage() {
           title="Nenhum contato ainda"
           description="Crie seu primeiro contato para começar"
           addLabel="Novo contato"
-          onAdd={handleCreate}
+          onAdd={openCreateContactDialog}
         />
       ) : displayed.length === 0 ? (
         <Typography sx={{ color: "#9ca3af", mt: 4 }}>
@@ -121,7 +134,8 @@ export default function ContactsPage() {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
+            gridTemplateColumns:
+              "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
             gap: 2,
           }}
         >
@@ -130,8 +144,8 @@ export default function ContactsPage() {
               key={contact.id}
               contact={contact}
               index={i}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
+              onEdit={openEditContactDialog}
+              onDelete={openDeleteContactDialog}
             />
           ))}
           {hasMore && !search.trim() && (

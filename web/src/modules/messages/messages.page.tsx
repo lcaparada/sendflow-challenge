@@ -19,9 +19,11 @@ import {
 
 export default function MessagesPage() {
   const { user } = useAuth();
+
   const { connectionId } = useParams<{ connectionId: string }>();
 
   const [contacts] = useContacts(user?.uid ?? "", connectionId ?? "");
+
   const [filter, setFilter] = useState<FilterTab>("all");
   const [pageSize, setPageSize] = useState(20);
 
@@ -39,7 +41,7 @@ export default function MessagesPage() {
     setPageSize(20);
   }
 
-  function handleCreate() {
+  function openCreateMessageDialog() {
     openDialog({
       maxWidth: "sm",
       fullWidth: true,
@@ -54,7 +56,7 @@ export default function MessagesPage() {
     });
   }
 
-  function handleEdit(message: MessageType) {
+  function openEditMessageDialog(message: MessageType) {
     openDialog({
       maxWidth: "sm",
       fullWidth: true,
@@ -69,7 +71,7 @@ export default function MessagesPage() {
     });
   }
 
-  function handleDelete(id: string) {
+  function openDeleteMessageDialog(id: string) {
     openDialog({
       maxWidth: "xs",
       fullWidth: true,
@@ -91,7 +93,7 @@ export default function MessagesPage() {
       button={{
         icon: <AddIcon />,
         label: "Nova mensagem",
-        onClick: handleCreate,
+        onClick: openCreateMessageDialog,
       }}
     >
       <TabsMessagesFilter filter={filter} onSelectFilter={handleFilterChange} />
@@ -108,7 +110,7 @@ export default function MessagesPage() {
               : `Nenhuma mensagem ${filter === "scheduled" ? "agendada" : "enviada"} ainda`
           }
           addLabel={filter === "all" ? "Nova mensagem" : undefined}
-          onAdd={filter === "all" ? handleCreate : undefined}
+          onAdd={filter === "all" ? openCreateMessageDialog : undefined}
         />
       ) : (
         <Box className="flex flex-col gap-3">
@@ -118,8 +120,8 @@ export default function MessagesPage() {
               message={msg}
               index={i}
               contacts={contacts}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
+              onEdit={openEditMessageDialog}
+              onDelete={openDeleteMessageDialog}
             />
           ))}
           {hasMore && (
