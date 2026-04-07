@@ -3,11 +3,7 @@ import { Box, Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import HubIcon from "@mui/icons-material/Hub";
 import { useNavigate } from "react-router-dom";
-import {
-  deleteConnection,
-  useConnections,
-  type ConnectionType,
-} from "..";
+import { deleteConnection, useConnections, type ConnectionType } from "..";
 import { useAuth } from "../../hooks";
 import {
   ConfirmDialog,
@@ -28,29 +24,25 @@ export default function ConnectionsPage() {
 
   const hasMore = connections.length === pageSize;
 
-  function handleCreate() {
+  function openCreateConnectionDialog() {
     openDialog({
       maxWidth: "xs",
       fullWidth: true,
       slotProps: { paper: { sx: { borderRadius: 3 } } },
-      children: (
-        <ConnectionFormDialog editing={null} />
-      ),
+      children: <ConnectionFormDialog editing={null} />,
     });
   }
 
-  function handleEdit(connection: ConnectionType) {
+  function openEditConnectionDialog(connection: ConnectionType) {
     openDialog({
       maxWidth: "xs",
       fullWidth: true,
       slotProps: { paper: { sx: { borderRadius: 3 } } },
-      children: (
-        <ConnectionFormDialog editing={connection} />
-      ),
+      children: <ConnectionFormDialog editing={connection} />,
     });
   }
 
-  function handleDelete(id: string) {
+  function openDeleteConnectionDialog(id: string) {
     openDialog({
       maxWidth: "xs",
       fullWidth: true,
@@ -69,7 +61,11 @@ export default function ConnectionsPage() {
     <PageWrapper
       title="Conexões"
       description={`${connections.length} conexão${connections.length !== 1 ? "es" : ""} cadastrada${connections.length !== 1 ? "s" : ""}`}
-      button={{ icon: <AddIcon />, label: "Nova conexão", onClick: handleCreate }}
+      button={{
+        icon: <AddIcon />,
+        label: "Nova conexão",
+        onClick: openCreateConnectionDialog,
+      }}
     >
       {loading ? (
         <LoadingIndicator />
@@ -79,13 +75,14 @@ export default function ConnectionsPage() {
           title="Nenhuma conexão ainda"
           description="Crie sua primeira conexão para começar"
           addLabel="Nova conexão"
-          onAdd={handleCreate}
+          onAdd={openCreateConnectionDialog}
         />
       ) : (
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
+            gridTemplateColumns:
+              "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
             gap: 2,
           }}
         >
@@ -95,8 +92,8 @@ export default function ConnectionsPage() {
               connection={conn}
               index={i}
               onClick={() => navigate(`/connections/${conn.id}/contacts`)}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
+              onEdit={openEditConnectionDialog}
+              onDelete={openDeleteConnectionDialog}
             />
           ))}
           {hasMore && (
